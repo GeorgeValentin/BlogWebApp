@@ -1,5 +1,4 @@
 const router = require('express').Router();
-const { response } = require('express');
 const { db } = require('../firebaseConfig');
 const generateData = require('../utils/dataGen');
 const utils = require('../utils/utils');
@@ -7,14 +6,13 @@ const checkUserExists = require('../middleware/checkUserExists');
 const checkBlogPostExists = require('../middleware/checkBlogPostExists');
 
 // -> get the blog posts of other users (DONE)
+// -> needed so that we can comment on other user's posts
 router
   .route('/users/:userId/blogPostsOfOthers')
   .get(checkUserExists, async (req, res) => {
     try {
       const userId = req.params.userId;
-      const blogPostsCollection = db
-        .collection('blogPosts')
-        .where('author', '==', userId);
+      const blogPostsCollection = db.collection('blogPosts');
 
       let blogPostsDocs = await blogPostsCollection.get();
 
@@ -72,7 +70,6 @@ router
           blogPost.author = userId;
           blogPost.category = categoriesArray[utils.randomizeArray(3)];
 
-          // const blogPostGeneratedId = db.collection('blogPosts').doc().id;
           const addedBlogPost = await blogPostsCollection.add(blogPost);
 
           // Add comments to the comments collection and establish relationships
@@ -220,8 +217,6 @@ router
   // -> delete a post with a specific user id (DONE - to be updated after adding the "comments" collection)
   .delete(checkUserExists, checkBlogPostExists, async (req, res) => {
     const { userId, blogPostId } = req.params;
-    console.log(blogPostId);
-    console.log(userId);
 
     const userDocRef = db.collection('users').doc(userId);
     const userDoc = await userDocRef.get();

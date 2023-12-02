@@ -68,6 +68,7 @@ router.route('/login').post(async (req, res) => {
     for (let index = 0; index < users.docs.length; index++) {
       if (users.docs[index].data().email === email) {
         userToLogin = users.docs[index].data();
+        userToLogin.userId = users.docs[index].id;
       }
     }
 
@@ -77,13 +78,12 @@ router.route('/login').post(async (req, res) => {
       if (validPass) {
         const serverSecret = process.env.MY_SECRET;
 
-        let token = jwt.sign(
-          {
-            data: userToLogin.email,
-          },
-          serverSecret,
-          { expiresIn: '1h' }
-        );
+        const tokenPayload = {
+          userId: userToLogin.userId,
+          email: userToLogin.email,
+        };
+
+        let token = jwt.sign(tokenPayload, serverSecret, { expiresIn: '1h' });
 
         let currentDate = new Date();
         loginResponse.token = token;

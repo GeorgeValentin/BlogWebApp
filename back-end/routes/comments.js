@@ -1,11 +1,10 @@
 const router = require('express').Router();
-const { response } = require('express');
 const { db } = require('../firebaseConfig');
-const generateData = require('../utils/dataGen');
 const utils = require('../utils/utils');
 const checkUserExists = require('../middleware/checkUserExists');
 const checkBlogPostExists = require('../middleware/checkBlogPostExists');
 const checkCommentExists = require('../middleware/checkCommentExists');
+const auth = require('../middleware/auth');
 
 router
   // -> get all comments of blog post of logged in user
@@ -31,7 +30,8 @@ router
   })
   // -> add a comment to a blog post that is (TBD - not of the post of the logged in user)
   // -> the logged in user should add comments to other people's posts
-  .post(checkUserExists, checkBlogPostExists, async (req, res) => {
+  .post(auth, checkUserExists, checkBlogPostExists, async (req, res) => {
+    const loggedInUser = req.user;
     const { userId, blogPostId } = req.params;
     const commentToAdd = req.body;
 
@@ -45,11 +45,13 @@ router
     const blogPostDoc = await blogPostDocRef.get();
     let blogPostData = blogPostDoc.data();
 
-    commentToAdd.userId = userId;
+    console.log('Logged In User:', loggedInUser.userId);
+    commentToAdd.authorId = loggedInUser.userId;
     commentToAdd.blogPostId = blogPostId;
 
     const addedComment = await commentsCollection.add(commentToAdd);
     commentToAdd.commentId = addedComment.id;
+    await commentsCollection.doc(commentToAdd.commentId).update(commentToAdd);
 
     blogPostData.comments.push(commentToAdd);
     await blogPostDocRef.update({ comments: blogPostData.comments });
@@ -57,6 +59,13 @@ router
     const blogPostIndex = userData.blogPosts.findIndex(
       (blogPost) => blogPost.blogPostId === blogPostId
     );
+
+    // for (const comment of userData.blogPosts[blogPostIndex].comments) {
+    //     if (comment.commentId === commentId) {
+    //       comment.content = commentToUpdate.content;
+    //     }
+    //   }
+    console.log(commentToAdd);
 
     if (blogPostIndex != -1) {
       userData.blogPosts[blogPostIndex].comments.push(commentToAdd);
@@ -96,6 +105,7 @@ router
       return res.status(200).json(response);
     }
   )
+  // -> update comments made to other people's blog posts
   .put(
     checkUserExists,
     checkBlogPostExists,
@@ -132,8 +142,6 @@ router
       const blogPostIndex = userData.blogPosts.findIndex(
         (blogPost) => blogPost.blogPostId === blogPostId
       );
-
-      console.log(userData.blogPosts[blogPostIndex].comments);
 
       for (const comment of userData.blogPosts[blogPostIndex].comments) {
         if (comment.commentId === commentId) {
