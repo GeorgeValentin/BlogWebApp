@@ -62,7 +62,7 @@ router
           generateData.generateCategory
         );
 
-        for (const blogPost of blogPostsArray) {
+        for (let blogPost of blogPostsArray) {
           // -> each post will have 2 comments
           const commentsArray = Array.from(
             { length: 2 },
@@ -71,18 +71,42 @@ router
 
           blogPost.author = userId;
           blogPost.category = categoriesArray[utils.randomizeArray(3)];
-          blogPost.comments = commentsArray;
 
+          // const blogPostGeneratedId = db.collection('blogPosts').doc().id;
           const addedBlogPost = await blogPostsCollection.add(blogPost);
-          blogPost.blogPostId = addedBlogPost.id;
 
-          // -> add the comments to the comments collection
-          for (const commToAdd of commentsArray) {
-            commToAdd.blogPostId = addedBlogPost.id;
-            commToAdd.userId = userId;
+          // Add comments to the comments collection and establish relationships
+          for (const commentToAdd of commentsArray) {
+            commentToAdd.userId = userId;
+            commentToAdd.blogPostId = addedBlogPost.id;
 
-            commentsCollection.add(commToAdd);
+            const addedComment = await commentsCollection.add(commentToAdd);
+            commentToAdd.commentId = addedComment.id;
+
+            // Update the comment with its ID
+            await commentsCollection.doc(addedComment.id).update(commentToAdd);
           }
+
+          // Update the blog post with comments and its ID
+          blogPost.comments = commentsArray;
+          blogPost.blogPostId = addedBlogPost.id;
+          await blogPostsCollection.doc(addedBlogPost.id).update(blogPost);
+
+          // // -> add the comments to the comments collection
+          // for (const commToAdd of commentsArray) {
+          //   commToAdd.userId = userId;
+          //   commToAdd.blogPostId = blogPostGeneratedId;
+
+          //   const addedComment = await commentsCollection.add(commToAdd);
+          //   commToAdd.commentId = addedComment.id;
+          //   await commentsCollection
+          //     .doc(addedComment.id)
+          //     .update({ comment: commToAdd });
+          // }
+
+          // blogPost.comments = commentsArray;
+          // blogPost.blogPostId = blogPostGeneratedId;
+          // await blogPostsCollection.add(blogPost);
         }
 
         // 1. storing blogPosts array inside the user
@@ -91,10 +115,18 @@ router
 
         response = blogPostsArray;
       } else {
-        blogPostsDocs.forEach((blogPostDoc) => {
-          const blogPostDocData = blogPostDoc.data();
+        // blogPostsDocs.forEach((blogPostDoc) => {
+        //   const blogPostDocData = blogPostDoc.data();
 
-          if (blogPostDocData.author === userId) response.push(blogPostDocData);
+        //   if (blogPostDocData.author === userId) response.push(blogPostDocData);
+        // });
+        // Retrieve and filter blog posts for the user
+        const blogPostsQuerySnapshot = await blogPostsCollection
+          .where('author', '==', userId)
+          .get();
+        blogPostsQuerySnapshot.forEach((blogPostDoc) => {
+          const blogPostDocData = blogPostDoc.data();
+          response.push(blogPostDocData);
         });
       }
 
