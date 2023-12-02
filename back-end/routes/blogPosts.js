@@ -52,9 +52,6 @@ router
       // -> if the blogPosts of the loggedIn user have no docs then randomly generate them with chance.js
       // (3) records generated
       if (usersDoc.data().blogPosts.length === 0) {
-        // Firestore batch write for atomic updates
-        const batch = db.batch();
-
         const blogPostsArray = Array.from(
           { length: 3 },
           generateData.generateBlogPost
@@ -76,14 +73,12 @@ router
           blogPost.category = categoriesArray[utils.randomizeArray(3)];
           blogPost.comments = commentsArray;
 
-          // const addedBlogPost = await blogPostsCollection.add(blogPost);
-          // blogPost.blogPostId = addedBlogPost.id;
-          const addedBlogPostRef = blogPostsCollection.doc();
-          batch.set(addedBlogPostRef, blogPost);
+          const addedBlogPost = await blogPostsCollection.add(blogPost);
+          blogPost.blogPostId = addedBlogPost.id;
 
           // -> add the comments to the comments collection
           for (const commToAdd of commentsArray) {
-            commToAdd.blogPostId = addedBlogPostRef.id;
+            commToAdd.blogPostId = addedBlogPost.id;
             commToAdd.userId = userId;
 
             commentsCollection.add(commToAdd);
@@ -92,10 +87,7 @@ router
 
         // 1. storing blogPosts array inside the user
         // Update user document with the array of blog posts
-        batch.update(usersDocRef, { blogPosts: blogPostsArray });
-
-        // Commit the batch
-        await batch.commit();
+        usersDocRef.update({ blogPosts: blogPostsArray });
 
         response = blogPostsArray;
       } else {
@@ -134,7 +126,6 @@ router
       const userDoc = await userDocRef.get();
       let userData = userDoc.data();
 
-      console.log(userData);
       blogPostToAdd.author = userId;
       blogPostToAdd.likes = 0;
       blogPostToAdd.comments = [];
