@@ -13,20 +13,10 @@ const generateBlogPost = () => {
   };
 };
 
-const generateComment = () => {
-  return {
-    content: chanceInstance.paragraph({ sentences: 2 }),
-    creationDate: chanceInstance.birthday({
-      string: true,
-      year: chanceInstance.year({ min: 2010, max: 2023 }),
-    }),
-  };
-};
-
 const generateCategory = () => {
   return {
     name: chanceInstance.word({ length: 7 }),
   };
 };
 
-module.exports = { generateBlogPost, generateCategory, generateComment };
+module.exports = { generateBlogPost, generateCategory };

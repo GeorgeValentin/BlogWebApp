@@ -4,6 +4,7 @@ const generateData = require('../utils/dataGen');
 const utils = require('../utils/utils');
 const checkUserExists = require('../middleware/checkUserExists');
 const checkBlogPostExists = require('../middleware/checkBlogPostExists');
+const auth = require('../middleware/auth');
 
 // -> get the blog posts of other users (DONE)
 // -> needed so that we can comment on other user's posts
@@ -40,15 +41,13 @@ router
 
       const blogPostsCollection = db.collection('blogPosts');
       const usersCollection = db.collection('users');
-      const commentsCollection = db.collection('comments');
       const usersDocRef = usersCollection.doc(userId);
-      const blogPostsDocs = await blogPostsCollection.get();
       const usersDoc = await usersDocRef.get();
 
       let response = [];
 
       // -> if the blogPosts of the loggedIn user have no docs then randomly generate them with chance.js
-      // (3) records generated
+      // => 3 records generated
       if (usersDoc.data().blogPosts.length === 0) {
         const blogPostsArray = Array.from(
           { length: 3 },
@@ -61,62 +60,21 @@ router
         );
 
         for (let blogPost of blogPostsArray) {
-          // -> each post will have 2 comments
-          const commentsArray = Array.from(
-            { length: 2 },
-            generateData.generateComment
-          );
-
           blogPost.author = userId;
           blogPost.category = categoriesArray[utils.randomizeArray(3)];
 
           const addedBlogPost = await blogPostsCollection.add(blogPost);
-
-          // Add comments to the comments collection and establish relationships
-          for (const commentToAdd of commentsArray) {
-            commentToAdd.userId = userId;
-            commentToAdd.blogPostId = addedBlogPost.id;
-
-            const addedComment = await commentsCollection.add(commentToAdd);
-            commentToAdd.commentId = addedComment.id;
-
-            // Update the comment with its ID
-            await commentsCollection.doc(addedComment.id).update(commentToAdd);
-          }
-
-          // Update the blog post with comments and its ID
-          blogPost.comments = commentsArray;
           blogPost.blogPostId = addedBlogPost.id;
+          blogPost.comments = [];
+
           await blogPostsCollection.doc(addedBlogPost.id).update(blogPost);
-
-          // // -> add the comments to the comments collection
-          // for (const commToAdd of commentsArray) {
-          //   commToAdd.userId = userId;
-          //   commToAdd.blogPostId = blogPostGeneratedId;
-
-          //   const addedComment = await commentsCollection.add(commToAdd);
-          //   commToAdd.commentId = addedComment.id;
-          //   await commentsCollection
-          //     .doc(addedComment.id)
-          //     .update({ comment: commToAdd });
-          // }
-
-          // blogPost.comments = commentsArray;
-          // blogPost.blogPostId = blogPostGeneratedId;
-          // await blogPostsCollection.add(blogPost);
         }
 
         // 1. storing blogPosts array inside the user
-        // Update user document with the array of blog posts
         usersDocRef.update({ blogPosts: blogPostsArray });
 
         response = blogPostsArray;
       } else {
-        // blogPostsDocs.forEach((blogPostDoc) => {
-        //   const blogPostDocData = blogPostDoc.data();
-
-        //   if (blogPostDocData.author === userId) response.push(blogPostDocData);
-        // });
         // Retrieve and filter blog posts for the user
         const blogPostsQuerySnapshot = await blogPostsCollection
           .where('author', '==', userId)
@@ -127,16 +85,6 @@ router
         });
       }
 
-      // 2. Saving the reference of the blogPosts inside the user
-      //   snapshot.forEach(async (blogPostDoc) => {
-      //     const blogPostData = blogPostDoc.data();
-      //     response.push(blogPostData);
-      // const userDoc = db.collection('users').doc(userId);
-      // await userDoc.update({
-      //   [`blogPosts.${blogPostDoc.id}`]: true,
-      // });
-      //});
-
       return res.status(200).json(response);
     } catch (err) {
       console.log(err);
@@ -144,10 +92,18 @@ router
     }
   })
   // -> add a blog post (DONE)
-  .post(checkUserExists, async (req, res) => {
+  .post(auth, checkUserExists, async (req, res) => {
     try {
       const blogPostToAdd = req.body;
       const userId = req.params.userId;
+      const loggedInUser = req.user;
+
+      if (loggedInUser.userId !== userId) {
+        return res.status(401).json({
+          message:
+            "Cannot add blog post! You are trying to add a blog post to someone else's list!",
+        });
+      }
 
       const blogPostsCollection = db.collection('blogPosts');
       const usersCollection = db.collection('users');
@@ -161,6 +117,8 @@ router
 
       const addedBlogPost = await blogPostsCollection.add(blogPostToAdd);
       blogPostToAdd.blogPostId = addedBlogPost.id;
+      await blogPostsCollection.doc(addedBlogPost.id).update(blogPostToAdd);
+
       userData.blogPosts.push(blogPostToAdd);
 
       await userDocRef.update({ blogPosts: userData.blogPosts });
@@ -184,8 +142,16 @@ router
     res.status(200).json(blogPostDoc.data());
   })
   // -> update blog post (DONE)
-  .put(checkUserExists, checkBlogPostExists, async (req, res) => {
+  .put(auth, checkUserExists, checkBlogPostExists, async (req, res) => {
     const { blogPostId, userId } = req.params;
+    const loggedInUser = req.user;
+
+    if (loggedInUser.userId !== userId) {
+      return res.status(401).json({
+        message: 'Cannot update blog post! You are not the owner of the post!',
+      });
+    }
+
     const blogPostToUpdate = req.body;
 
     const blogPostDocRef = db.collection('blogPosts').doc(blogPostId);
@@ -215,8 +181,15 @@ router
     });
   })
   // -> delete a post with a specific user id (DONE - to be updated after adding the "comments" collection)
-  .delete(checkUserExists, checkBlogPostExists, async (req, res) => {
+  .delete(auth, checkUserExists, checkBlogPostExists, async (req, res) => {
     const { userId, blogPostId } = req.params;
+    const loggedInUser = req.user;
+
+    if (loggedInUser.userId !== userId) {
+      return res.status(401).json({
+        message: 'Cannot delete blog post! You are not the owner of the post!',
+      });
+    }
 
     const userDocRef = db.collection('users').doc(userId);
     const userDoc = await userDocRef.get();
@@ -224,17 +197,32 @@ router
     const blogPostDocRef = db.collection('blogPosts').doc(blogPostId);
     const blogPostDoc = await blogPostDocRef.get();
     const blogPostData = blogPostDoc.data();
+    const commentsCollection = db.collection('comments');
+    const commentsDocs = await commentsCollection.get();
 
-    // -> uncomment when treating the "comments" collection
-    // if (blogPostData.comments.length === 0) {
+    // -> check if the loggedIn user is the same with the owner of the blog post
+    if (loggedInUser.userId === userId) {
+      if (blogPostData.comments.length !== 0) {
+        // remove comments from the table
+        commentsDocs.forEach(async (commentDoc) => {
+          const commentDocData = commentDoc.data();
 
-    if (blogPostData.userId !== userId)
-      return res.status(400).json({
-        message: `The blog post with id {${blogPostId}} does not belong to the user with id {${userId}}!`,
+          await commentsCollection.doc(commentDocData.commentId).delete();
+
+          let blogPostComments = blogPostData.comments;
+
+          blogPostComments = blogPostComments.filter(
+            (blogPostComment) => blogPostComment.blogPostId !== blogPostId
+          );
+
+          await blogPostDocRef.update({ comments: blogPostComments });
+        });
+      }
+    } else {
+      return res.status(401).json({
+        message: `You do not have the right to delete someone else's post!`,
       });
-
-    // -> deletes the blog post from the "blogPosts" collection
-    await blogPostDocRef.delete();
+    }
 
     // -> update the users array of blogPosts
     let userBlogPosts = userData.blogPosts;
@@ -244,10 +232,11 @@ router
       (userBlogPost) => userBlogPost.blogPostId !== blogPostId
     );
 
+    // -> update the "users" collection to not include that blog post
     await userDocRef.update({ blogPosts: userBlogPosts });
-    // } else {
-    // remove comments from the table
-    // }
+
+    // -> remove the blog post from the "blogPosts" collection
+    await blogPostDocRef.delete();
 
     return res.status(200).json({
       message: `The blog post with id {${blogPostId}} deleted succesfully together with all its comments!`,

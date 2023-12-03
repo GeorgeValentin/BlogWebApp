@@ -2,7 +2,6 @@ const { db } = require('../firebaseConfig');
 
 const checkUserExists = async (req, res, next) => {
   const { userId } = req.params;
-  console.log(userId);
   const userDocRef = db.collection('users').doc(userId);
 
   try {
