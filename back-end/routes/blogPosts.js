@@ -2,21 +2,20 @@ const router = require('express').Router();
 const { db } = require('../firebaseConfig');
 const generateData = require('../utils/dataGen');
 const utils = require('../utils/utils');
-const checkUserExists = require('../middleware/checkUserExists');
-const checkBlogPostExists = require('../middleware/checkBlogPostExists');
+const checkUser = require('../middleware/checkUser');
+const checkBlogPost = require('../middleware/checkBlogPost');
 const auth = require('../middleware/auth');
 
 // -> get the blog posts of other users (DONE)
 // -> needed so that we can comment on other user's posts
 router
   .route('/users/:userId/blogPostsOfOthers')
-  .get(checkUserExists, async (req, res) => {
+  .get(checkUser, async (req, res) => {
     try {
       const userId = req.params.userId;
+
       const blogPostsCollection = db.collection('blogPosts');
-
       let blogPostsDocs = await blogPostsCollection.get();
-
       let response = [];
 
       blogPostsDocs.forEach((blogPostDoc) => {
@@ -33,22 +32,17 @@ router
   });
 
 router
-  // -> all blog posts of user (DONE)
+  // -> all blog posts of logged in user (DONE)
   .route('/users/:userId/blogPosts')
-  .get(checkUserExists, async (req, res) => {
+  .get(checkUser, async (req, res) => {
     try {
       const userId = req.params.userId;
-
       const blogPostsCollection = db.collection('blogPosts');
-      const usersCollection = db.collection('users');
-      const usersDocRef = usersCollection.doc(userId);
-      const usersDoc = await usersDocRef.get();
-
       let response = [];
 
       // -> if the blogPosts of the loggedIn user have no docs then randomly generate them with chance.js
       // => 3 records generated
-      if (usersDoc.data().blogPosts.length === 0) {
+      if (req.userDocData.blogPosts.length === 0) {
         const blogPostsArray = Array.from(
           { length: 3 },
           generateData.generateBlogPost
@@ -71,7 +65,7 @@ router
         }
 
         // 1. storing blogPosts array inside the user
-        usersDocRef.update({ blogPosts: blogPostsArray });
+        req.userDocRef.update({ blogPosts: blogPostsArray });
 
         response = blogPostsArray;
       } else {
@@ -92,7 +86,7 @@ router
     }
   })
   // -> add a blog post (DONE)
-  .post(auth, checkUserExists, async (req, res) => {
+  .post(auth, checkUser, async (req, res) => {
     try {
       const blogPostToAdd = req.body;
       const userId = req.params.userId;
@@ -106,10 +100,6 @@ router
       }
 
       const blogPostsCollection = db.collection('blogPosts');
-      const usersCollection = db.collection('users');
-      const userDocRef = usersCollection.doc(userId);
-      const userDoc = await userDocRef.get();
-      let userData = userDoc.data();
 
       blogPostToAdd.author = userId;
       blogPostToAdd.likes = 0;
@@ -119,9 +109,9 @@ router
       blogPostToAdd.blogPostId = addedBlogPost.id;
       await blogPostsCollection.doc(addedBlogPost.id).update(blogPostToAdd);
 
-      userData.blogPosts.push(blogPostToAdd);
+      req.userDocData.blogPosts.push(blogPostToAdd);
 
-      await userDocRef.update({ blogPosts: userData.blogPosts });
+      await req.userDocRef.update({ blogPosts: req.userDocData.blogPosts });
 
       return res.status(200).json(blogPostToAdd);
     } catch (err) {
@@ -133,16 +123,11 @@ router
 router
   .route('/users/:userId/blogPosts/:blogPostId')
   // -> get blog post by id (DONE)
-  .get(checkUserExists, checkBlogPostExists, async (req, res) => {
-    const blogPostId = req.params.blogPostId;
-    const blogPostsCollection = db.collection('blogPosts');
-    const blogPostDocRef = blogPostsCollection.doc(blogPostId);
-    const blogPostDoc = await blogPostDocRef.get();
-
-    res.status(200).json(blogPostDoc.data());
+  .get(checkUser, checkBlogPost, async (req, res) => {
+    res.status(200).json(req.blogPostDocData);
   })
   // -> update blog post (DONE)
-  .put(auth, checkUserExists, checkBlogPostExists, async (req, res) => {
+  .put(auth, checkUser, checkBlogPost, async (req, res) => {
     const { blogPostId, userId } = req.params;
     const loggedInUser = req.user;
 
@@ -154,34 +139,27 @@ router
 
     const blogPostToUpdate = req.body;
 
-    const blogPostDocRef = db.collection('blogPosts').doc(blogPostId);
-    const blogPostDoc = await blogPostDocRef.get();
-    let blogPostData = blogPostDoc.data();
-    const userDocRef = db.collection('users').doc(userId);
-    const userDoc = await userDocRef.get();
-    let userData = userDoc.data();
+    req.blogPostDocData.title = blogPostToUpdate.title;
+    req.blogPostDocData.content = blogPostToUpdate.content;
+    req.blogPostDocData.category = blogPostToUpdate.category;
 
-    blogPostData.title = blogPostToUpdate.title;
-    blogPostData.content = blogPostToUpdate.content;
-    blogPostData.category = blogPostToUpdate.category;
+    await req.blogPostDocRef.update(req.blogPostDocData);
 
-    await blogPostDocRef.update(blogPostData);
-
-    for (const blogPost of userData.blogPosts) {
+    for (const blogPost of req.userDocData.blogPosts) {
       if (blogPost.blogPostId === blogPostId) {
         blogPost.content = blogPostToUpdate.content;
         blogPost.title = blogPostToUpdate.title;
         blogPost.category = blogPostToUpdate.category;
       }
     }
-    await userDocRef.update({ blogPosts: userData.blogPosts });
+    await req.userDocRef.update({ blogPosts: req.userDocData.blogPosts });
 
     res.status(200).json({
-      message: `The blog post with id ${blogPostId} has been updated!`,
+      message: `The blog post with id {${blogPostId}} has been updated!`,
     });
   })
   // -> delete a post with a specific user id (DONE - to be updated after adding the "comments" collection)
-  .delete(auth, checkUserExists, checkBlogPostExists, async (req, res) => {
+  .delete(auth, checkUser, checkBlogPost, async (req, res) => {
     const { userId, blogPostId } = req.params;
     const loggedInUser = req.user;
 
@@ -191,31 +169,25 @@ router
       });
     }
 
-    const userDocRef = db.collection('users').doc(userId);
-    const userDoc = await userDocRef.get();
-    const userData = userDoc.data();
-    const blogPostDocRef = db.collection('blogPosts').doc(blogPostId);
-    const blogPostDoc = await blogPostDocRef.get();
-    const blogPostData = blogPostDoc.data();
     const commentsCollection = db.collection('comments');
     const commentsDocs = await commentsCollection.get();
 
     // -> check if the loggedIn user is the same with the owner of the blog post
     if (loggedInUser.userId === userId) {
-      if (blogPostData.comments.length !== 0) {
+      if (req.blogPostDocData.comments.length !== 0) {
         // remove comments from the table
         commentsDocs.forEach(async (commentDoc) => {
           const commentDocData = commentDoc.data();
 
           await commentsCollection.doc(commentDocData.commentId).delete();
 
-          let blogPostComments = blogPostData.comments;
+          let blogPostComments = req.blogPostDocData.comments;
 
           blogPostComments = blogPostComments.filter(
             (blogPostComment) => blogPostComment.blogPostId !== blogPostId
           );
 
-          await blogPostDocRef.update({ comments: blogPostComments });
+          await req.blogPostDocRef.update({ comments: blogPostComments });
         });
       }
     } else {
@@ -225,7 +197,7 @@ router
     }
 
     // -> update the users array of blogPosts
-    let userBlogPosts = userData.blogPosts;
+    let userBlogPosts = req.userDocData.blogPosts;
 
     // -> remove the blog post from the users collection
     userBlogPosts = userBlogPosts.filter(
@@ -233,10 +205,10 @@ router
     );
 
     // -> update the "users" collection to not include that blog post
-    await userDocRef.update({ blogPosts: userBlogPosts });
+    await req.userDocRef.update({ blogPosts: userBlogPosts });
 
     // -> remove the blog post from the "blogPosts" collection
-    await blogPostDocRef.delete();
+    await req.blogPostDocRef.delete();
 
     return res.status(200).json({
       message: `The blog post with id {${blogPostId}} deleted succesfully together with all its comments!`,
