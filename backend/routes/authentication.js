@@ -1,13 +1,13 @@
-require('dotenv').config();
-const router = require('express').Router();
-const { db } = require('../firebaseConfig');
-const bcrypt = require('bcrypt');
+require("dotenv").config();
+const router = require("express").Router();
+const { db } = require("../firebaseConfig");
+const bcrypt = require("bcrypt");
 const saltRounds = 10;
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
-router.route('/register').post(async (req, res) => {
+router.route("/register").post(async (req, res) => {
   try {
-    const { username, email, password, phoneNumber, age } = req.body;
+    const { email, password } = req.body;
 
     // 1. storing the array of blogPosts
     const blogPosts = [];
@@ -15,16 +15,11 @@ router.route('/register').post(async (req, res) => {
     // -> storing references
     // const blogPosts = {};
 
-    if (
-      username === undefined ||
-      email === undefined ||
-      password === undefined ||
-      phoneNumber === undefined ||
-      age === undefined
-    )
-      return res.status(400).json({ message: 'Missing credentials!' });
+    if (email === undefined || password === undefined) {
+      return res.status(400).json({ message: "Missing credentials!" });
+    }
 
-    const users = await db.collection('users').get();
+    const users = await db.collection("users").get();
 
     let success = true;
 
@@ -38,29 +33,27 @@ router.route('/register').post(async (req, res) => {
 
     if (success) {
       const hash = await bcrypt.hash(password, saltRounds);
-      await db
-        .collection('users')
-        .add({ username, email, hash, phoneNumber, age, blogPosts });
+      await db.collection("users").add({ email, hash, blogPosts });
 
-      return res.status(200).json({ message: 'User added succesfully!' });
+      return res.status(200).json({ message: "User added succesfully!" });
     } else {
       return res
         .status(400)
-        .json({ message: 'Email address already registered!' });
+        .json({ message: "Email address already registered!" });
     }
   } catch (err) {
     return res.status(500).json(err);
   }
 });
 
-router.route('/login').post(async (req, res) => {
+router.route("/login").post(async (req, res) => {
   try {
     const { email, password } = req.body;
 
     if (email === undefined || password === undefined)
-      return res.status(400).json({ message: 'Missing credentials!' });
+      return res.status(400).json({ message: "Missing credentials!" });
 
-    const users = await db.collection('users').get();
+    const users = await db.collection("users").get();
     let userToLogin;
     let loginResponse = {};
 
@@ -83,20 +76,20 @@ router.route('/login').post(async (req, res) => {
           email: userToLogin.email,
         };
 
-        let token = jwt.sign(tokenPayload, serverSecret, { expiresIn: '1h' });
+        let token = jwt.sign(tokenPayload, serverSecret, { expiresIn: "1h" });
 
         let currentDate = new Date();
         loginResponse.token = token;
-        loginResponse.message = 'Logged in successfully!';
-        loginResponse.expiresIn = '1h';
+        loginResponse.message = "Logged in successfully!";
+        loginResponse.expiresIn = "1h";
         loginResponse.expiry = new Date(currentDate).setHours(
           currentDate.getHours() + 1
         );
 
         return res.status(200).json(loginResponse);
-      } else return res.status(400).json({ message: 'Wrong password!' });
+      } else return res.status(400).json({ message: "Wrong password!" });
     } else {
-      return res.status(404).json({ message: 'The user does not exist!' });
+      return res.status(404).json({ message: "The user does not exist!" });
     }
   } catch (err) {
     console.log(err);

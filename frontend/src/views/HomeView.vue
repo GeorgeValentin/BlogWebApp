@@ -12,6 +12,13 @@ export default {
   computed: {
     ...mapGetters("auth", ["getLoggedInStatus"]),
   },
+  mounted() {
+    const reloaded = localStorage.getItem("reloaded");
+    if (reloaded === "true" || reloaded === undefined || reloaded === null) {
+      localStorage.setItem("reloaded", "false");
+      location.reload();
+    }
+  },
 };
 
 // -> vuex reference
@@ -23,7 +30,7 @@ export default {
 //   components: {
 //     HelloWorld,
 //   },
-//   // - "computed" = computed properties
+//   // - "computed" = computed property
 //   // -> derived from one or more data properties and are cached based on their dependencies
 //   // and only recalculated when those dependencies change
 //   // -> more efficient for handling reactive data

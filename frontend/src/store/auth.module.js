@@ -1,3 +1,5 @@
+import AuthService from "@/services/auth.service";
+
 const user = JSON.parse(localStorage.getItem("tokenResponse"));
 const initialState = user
   ? { status: { loggedIn: true }, user }
@@ -24,18 +26,18 @@ export const auth = {
       // AuthService.logout();
       commit("logout");
     },
-    //register({ commit }, user) {
-    // return AuthService.register(user).then(
-    //   response => {
-    //     commit('registerSuccess');
-    //     return Promise.resolve(response.data);
-    //   },
-    //   error => {
-    //     commit('registerFailure');
-    //     return Promise.reject(error);
-    //   }
-    // );
-    //},
+    register({ commit }, user) {
+      return AuthService.register(user).then(
+        (response) => {
+          commit("registerSuccess");
+          return Promise.resolve(response.data);
+        },
+        (error) => {
+          commit("registerFailure");
+          return Promise.reject(error);
+        }
+      );
+    },
   },
   mutations: {
     loginSuccess(state, user) {
