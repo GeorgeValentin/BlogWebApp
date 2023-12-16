@@ -13,7 +13,7 @@
       <router-link to="/" id="logout-btn-container" class="nav-link">
         <button
           class="btn btn-dark fw-bold border border-dark border-3"
-          @click="logout"
+          @click="handleLogout"
         >
           Logout
         </button>
@@ -45,6 +45,7 @@
 
 <script>
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { mapActions } from "vuex";
 
 export default {
   name: "NavLinks",
@@ -53,7 +54,9 @@ export default {
   },
   props: ["userEmail"],
   methods: {
-    logout: function () {
+    ...mapActions("auth", ["logout"]),
+    handleLogout: function () {
+      this.logout();
       this.$router.push("/login");
     },
   },

@@ -1,6 +1,5 @@
 import axios from "axios";
 
-// const API_URL = "http://localhost:8000/authentication/";
 const API_URL = "authentication/";
 
 class AuthService {
@@ -17,6 +16,7 @@ class AuthService {
           localStorage.setItem("userEmail", user.email);
           localStorage.setItem("isAuth", true);
         }
+        response.data.loggedInUserEmail = user.email;
 
         return response.data;
       });

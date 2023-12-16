@@ -6,7 +6,7 @@ const serverPort = 8000;
 const cors = require("cors");
 
 const corsOptions = {
-  origin: "http://localhost:8082",
+  origin: "http://localhost:8080",
 };
 
 const app = express();

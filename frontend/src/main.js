@@ -31,6 +31,6 @@ library.add(
   faBook
 );
 
-axios.defaults.baseURL = "http://localhost:8000";
+axios.defaults.baseURL = "http://localhost:8000/";
 
 createApp(App).use(router).use(store).mount("#app");

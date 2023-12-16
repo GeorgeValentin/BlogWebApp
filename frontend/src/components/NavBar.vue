@@ -4,12 +4,13 @@
       <h1>Blogify</h1>
     </router-link>
 
-    <nav-links :userEmail="userEmail" />
+    <nav-links :userEmail="getLoggedInUserEmail" />
   </article>
 </template>
 
 <script>
 import NavLinks from "./NavLinks";
+import { mapGetters } from "vuex";
 
 export default {
   name: "NavBar",
@@ -18,10 +19,14 @@ export default {
       userEmail: {},
     };
   },
-  // -> lifecycle hook called after the Vue instance has been created but before it is mounted to the DOM
+  // -> lifecycle hook called after the Vue instance has been created but before it is mounted to the
+  // DOM
   // -> best for data fetching, settings up event listeners or other initializations
   created() {
     this.userEmail = localStorage.getItem("userEmail");
+  },
+  computed: {
+    ...mapGetters("auth", ["getLoggedInStatus", "getLoggedInUserEmail"]),
   },
   components: {
     NavLinks,

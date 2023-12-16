@@ -1,29 +1,31 @@
 import AuthService from "@/services/auth.service";
 
 const user = JSON.parse(localStorage.getItem("tokenResponse"));
+const userEmail = localStorage.getItem("userEmail");
+
 const initialState = user
-  ? { status: { loggedIn: true }, user }
-  : { status: { loggedIn: false }, user: null };
+  ? { status: { loggedIn: true }, user, userEmail }
+  : { status: { loggedIn: false }, user: null, userEmail: null };
 
 export const auth = {
   // -> good for avoiding naming conflicts
   namespaced: true,
   state: initialState,
   actions: {
-    // login({ commit }, user) {
-    // return AuthService.login(user).then(
-    //   user => {
-    //     commit('loginSuccess', user);
-    //     return Promise.resolve(user);
-    //   },
-    //   error => {
-    //     commit('loginFailure');
-    //     return Promise.reject(error);
-    //   }
-    // );
-    // },
+    login({ commit }, user) {
+      return AuthService.login(user).then(
+        (user) => {
+          commit("loginSuccess", user);
+          return Promise.resolve(user);
+        },
+        (error) => {
+          commit("loginFailure");
+          return Promise.reject(error);
+        }
+      );
+    },
     logout({ commit }) {
-      // AuthService.logout();
+      AuthService.logout();
       commit("logout");
     },
     register({ commit }, user) {
@@ -43,6 +45,7 @@ export const auth = {
     loginSuccess(state, user) {
       state.status.loggedIn = true;
       state.user = user;
+      state.userEmail = user.loggedInUserEmail;
     },
     loginFailure(state) {
       state.status.loggedIn = false;
@@ -51,6 +54,7 @@ export const auth = {
     logout(state) {
       state.status.loggedIn = false;
       state.user = null;
+      state.userEmail = null;
     },
     registerSuccess(state) {
       state.status.loggedIn = false;
@@ -62,6 +66,9 @@ export const auth = {
   getters: {
     getLoggedInStatus: (state) => {
       return state.status.loggedIn;
+    },
+    getLoggedInUserEmail: (state) => {
+      return state.userEmail;
     },
   },
 };

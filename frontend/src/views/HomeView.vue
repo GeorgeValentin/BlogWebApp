@@ -12,13 +12,6 @@ export default {
   computed: {
     ...mapGetters("auth", ["getLoggedInStatus"]),
   },
-  mounted() {
-    const reloaded = localStorage.getItem("reloaded");
-    if (reloaded === "true" || reloaded === undefined || reloaded === null) {
-      localStorage.setItem("reloaded", "false");
-      location.reload();
-    }
-  },
 };
 
 // -> vuex reference
