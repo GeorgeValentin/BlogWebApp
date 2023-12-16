@@ -16,7 +16,7 @@ class AuthService {
           localStorage.setItem("userEmail", user.email);
           localStorage.setItem("isAuth", true);
         }
-        response.data.loggedInUserEmail = user.email;
+        response.loggedInUserEmail = user.email;
 
         return response.data;
       });

@@ -70,5 +70,8 @@ export const auth = {
     getLoggedInUserEmail: (state) => {
       return state.userEmail;
     },
+    getLoggedInUserData: (state) => {
+      return state.user;
+    },
   },
 };
