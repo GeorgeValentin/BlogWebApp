@@ -1,15 +1,15 @@
 <template>
-  <!-- <article>{{ getLoggedInUserData.userId }}</article> -->
-
+  <!-- If not logged in then show all blog posts, but do not allow the user that sees them to do anything -->
   <div v-if="getLoggedInStatus === false">
-    You must first login into the app to be able to use it!
-
-    <home-app-description />
+    <!-- <home-app-description /> -->
+    <blog-posts-list :blogPosts="getBlogPosts" />
   </div>
 
+  <!-- Show the blog posts of the user that is logged in 
+      - he will be able to add more posts
+      - UPDATE/DELETE the existing -->
+  <!-- -> also create a button in  the Menu called "community@ or something similar that allows the user that is logged in the other user's posts, comment and like them  -->
   <div v-else>
-    <div>Blog Posts:</div>
-
     <!-- <div v-for="blogPost in getBlogPosts" :key="blogPost.blogPostId">
     <div>---------</div>
     <div>{{ blogPost }}</div>
@@ -24,34 +24,48 @@
 // import DataService from "@/services/data.service";
 import { mapGetters, mapActions } from "vuex";
 import BlogPostsList from "@/components/BlogPostsList";
-import HomeAppDescription from "@/components/HomeAppDescription.vue";
+// import HomeAppDescription from "@/components/HomeAppDescription.vue";
 
 export default {
   name: "HomeView",
-  components: { BlogPostsList, HomeAppDescription },
+  components: { BlogPostsList },
   computed: {
     ...mapGetters("auth", ["getLoggedInStatus", "getLoggedInUserData"]),
     ...mapGetters("blogPostsModule", ["getBlogPosts"]),
   },
   created() {
+    // -> get the logged in user's blog posts
     if (this.getLoggedInStatus === true) {
-      this.getBlogPostsOfUser();
+      if (this.getLoggedInUserData !== null) {
+        this.getBlogPostsOfUser(this.getLoggedInUserData.userId);
+      }
     } else {
-      // call the method that gets other people's blog posts
+      // -> get all blog posts of all user's
+      this.getAllBlogPosts();
     }
   },
   methods: {
-    ...mapActions("blogPostsModule", ["getBlogPostsOfLoggedInUser"]),
-    getBlogPostsOfUser: async function () {
-      if (this.getLoggedInUserData !== null) {
-        await this.getBlogPostsOfLoggedInUser(this.getLoggedInUserData.userId);
-      }
+    ...mapActions("blogPostsModule", [
+      "getBlogPostsOfLoggedInUser",
+      "getEntireListOfBlogPosts",
+    ]),
+    // getBlogPostsOfUser: async function (userId) {
+    //   if (this.getLoggedInUserData !== null) {
+    //     await this.getBlogPostsOfLoggedInUser(this.getLoggedInUserData.userId);
+    //   }
+    // },
+    getBlogPostsOfUser: async function (userId) {
+      await this.getBlogPostsOfLoggedInUser(userId);
     },
-    getBlogPostsOfOthers: async function () {
-      if (this.getLoggedInUserData !== null) {
-        await this.getBlogPostsOfLoggedInUser(this.getLoggedInUserData.userId);
-      }
+    getAllBlogPosts: async function () {
+      await this.getEntireListOfBlogPosts();
     },
+    // -> to be implemented
+    // getBlogPostsOfOthers: async function () {
+    //   if (this.getLoggedInUserData !== null) {
+    //     await this.getBlogPostsOfLoggedInUser(this.getLoggedInUserData.userId);
+    //   }
+    // },
   },
 };
 

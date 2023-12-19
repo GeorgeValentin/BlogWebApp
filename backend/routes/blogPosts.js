@@ -1,20 +1,39 @@
-const router = require('express').Router();
-const { db } = require('../firebaseConfig');
-const generateData = require('../utils/dataGen');
-const utils = require('../utils/utils');
-const checkUser = require('../middleware/checkUser');
-const checkBlogPost = require('../middleware/checkBlogPost');
-const auth = require('../middleware/auth');
+const router = require("express").Router();
+const { db } = require("../firebaseConfig");
+const generateData = require("../utils/dataGen");
+const utils = require("../utils/utils");
+const checkUser = require("../middleware/checkUser");
+const checkBlogPost = require("../middleware/checkBlogPost");
+const auth = require("../middleware/auth");
+
+router.route("/allBlogPosts").get(async (req, res) => {
+  try {
+    const blogPostsCollection = db.collection("blogPosts");
+    let blogPostsDocs = await blogPostsCollection.get();
+    let response = [];
+
+    blogPostsDocs.forEach((blogPostDoc) => {
+      const blogPostDocData = blogPostDoc.data();
+
+      response.push(blogPostDocData);
+    });
+
+    return res.status(200).json(response);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json(err);
+  }
+});
 
 // -> get the blog posts of other users (DONE)
 // -> needed so that we can comment on other user's posts
 router
-  .route('/users/:userId/blogPostsOfOthers')
+  .route("/users/:userId/blogPostsOfOthers")
   .get(checkUser, async (req, res) => {
     try {
       const userId = req.params.userId;
 
-      const blogPostsCollection = db.collection('blogPosts');
+      const blogPostsCollection = db.collection("blogPosts");
       let blogPostsDocs = await blogPostsCollection.get();
       let response = [];
 
@@ -33,11 +52,11 @@ router
 
 router
   // -> all blog posts of logged in user (DONE)
-  .route('/users/:userId/blogPosts')
+  .route("/users/:userId/blogPosts")
   .get(checkUser, async (req, res) => {
     try {
       const userId = req.params.userId;
-      const blogPostsCollection = db.collection('blogPosts');
+      const blogPostsCollection = db.collection("blogPosts");
       let response = [];
 
       // -> if the blogPosts of the loggedIn user have no docs then randomly generate them with chance.js
@@ -71,7 +90,7 @@ router
       } else {
         // Retrieve and filter blog posts for the user
         const blogPostsQuerySnapshot = await blogPostsCollection
-          .where('author', '==', userId)
+          .where("author", "==", userId)
           .get();
         blogPostsQuerySnapshot.forEach((blogPostDoc) => {
           const blogPostDocData = blogPostDoc.data();
@@ -99,7 +118,7 @@ router
         });
       }
 
-      const blogPostsCollection = db.collection('blogPosts');
+      const blogPostsCollection = db.collection("blogPosts");
 
       blogPostToAdd.author = userId;
       blogPostToAdd.likes = 0;
@@ -121,7 +140,7 @@ router
   });
 
 router
-  .route('/users/:userId/blogPosts/:blogPostId')
+  .route("/users/:userId/blogPosts/:blogPostId")
   // -> get blog post by id (DONE)
   .get(checkUser, checkBlogPost, async (req, res) => {
     res.status(200).json(req.blogPostDocData);
@@ -133,7 +152,7 @@ router
 
     if (loggedInUser.userId !== userId) {
       return res.status(401).json({
-        message: 'Cannot update blog post! You are not the owner of the post!',
+        message: "Cannot update blog post! You are not the owner of the post!",
       });
     }
 
@@ -165,11 +184,11 @@ router
 
     if (loggedInUser.userId !== userId) {
       return res.status(401).json({
-        message: 'Cannot delete blog post! You are not the owner of the post!',
+        message: "Cannot delete blog post! You are not the owner of the post!",
       });
     }
 
-    const commentsCollection = db.collection('comments');
+    const commentsCollection = db.collection("comments");
     const commentsDocs = await commentsCollection.get();
 
     // -> check if the loggedIn user is the same with the owner of the blog post

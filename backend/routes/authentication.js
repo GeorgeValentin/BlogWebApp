@@ -7,7 +7,7 @@ const jwt = require("jsonwebtoken");
 
 router.route("/register").post(async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { username, email, password } = req.body;
 
     // 1. storing the array of blogPosts
     const blogPosts = [];
@@ -15,7 +15,11 @@ router.route("/register").post(async (req, res) => {
     // -> storing references
     // const blogPosts = {};
 
-    if (email === undefined || password === undefined) {
+    if (
+      username === undefined ||
+      email === undefined ||
+      password === undefined
+    ) {
       return res.status(400).json({ message: "Missing credentials!" });
     }
 
@@ -33,7 +37,7 @@ router.route("/register").post(async (req, res) => {
 
     if (success) {
       const hash = await bcrypt.hash(password, saltRounds);
-      await db.collection("users").add({ email, hash, blogPosts });
+      await db.collection("users").add({ username, email, hash, blogPosts });
 
       return res.status(200).json({ message: "User added succesfully!" });
     } else {

@@ -17,31 +17,51 @@ const initialState = {
 };
 
 export const blogPostsModule = {
-  // -> good for avoiding naming conflicts
+  // -> namespaced: true - good for avoiding naming conflicts as this module will be identified
+  // by its name = blogPosts
   namespaced: true,
   state: initialState,
   actions: {
-    getBlogPostsOfLoggedInUser({ commit }, userId) {
-      return BlogPostsService.getBlogPostsOfLoggedInUser(userId).then(
+    getEntireListOfBlogPosts({ commit }) {
+      return BlogPostsService.getAllBlogPostsEndpoint().then(
         (response) => {
-          commit("getBlogPostsOfLoggedInUserSuccess", response);
+          commit("getBlogPostsSuccess", response);
           return Promise.resolve(response);
         },
         (error) => {
-          commit("getBlogPostsOfLoggedInUserFailure");
+          commit("getBlogPostsFailure");
+          return Promise.reject(error);
+        }
+      );
+    },
+    getBlogPostsOfLoggedInUser({ commit }, userId) {
+      return BlogPostsService.getBlogPostsOfLoggedInUser(userId).then(
+        (response) => {
+          commit("getBlogPostsSuccess", response);
+          return Promise.resolve(response);
+        },
+        (error) => {
+          commit("getBlogPostsFailure");
           return Promise.reject(error);
         }
       );
     },
   },
   mutations: {
-    getBlogPostsOfLoggedInUserSuccess(state, blogPosts) {
+    getBlogPostsSuccess(state, blogPosts) {
       state.blogPostsList = blogPosts.data;
       state.getBlogPostStatus = true;
     },
-    getBlogPostsOfLoggedInUserFailure(state) {
+    getBlogPostsFailure(state) {
       state.getBlogPostStatus = false;
     },
+    // getBlogPostsOfLoggedInUserSuccess(state, blogPosts) {
+    //   state.blogPostsList = blogPosts.data;
+    //   state.getBlogPostStatus = true;
+    // },
+    // getBlogPostsOfLoggedInUserFailure(state) {
+    //   state.getBlogPostStatus = false;
+    // },
   },
   getters: {
     getBlogPosts: (state) => {

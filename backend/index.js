@@ -17,6 +17,7 @@ app.use(cors(corsOptions));
 app.use("/authentication", require("./routes/authentication"));
 app.use("/api", require("./routes/blogPosts"));
 app.use("/api", require("./routes/comments"));
+app.use("/api", require("./routes/users"));
 
 app.listen(serverPort, async () => {
   console.log(`Server started on port ${serverPort}`);

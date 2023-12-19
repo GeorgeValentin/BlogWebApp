@@ -43,6 +43,7 @@ export const auth = {
   },
   mutations: {
     loginSuccess(state, user) {
+      console.log(user);
       state.status.loggedIn = true;
       state.user = user;
       state.userEmail = user.loggedInUserEmail;

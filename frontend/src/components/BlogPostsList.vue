@@ -1,10 +1,21 @@
 <template>
   <article class="container-fluid">
+    <!-- User is logged in -->
     <div
+      v-if="getLoggedInStatus === true"
+      class="d-flex justify-content-center align-items-center gap-3 mt-4 mb-3"
+    >
+      User is Logged in
+    </div>
+
+    <div
+      v-else
       class="d-flex justify-content-center align-items-center gap-3 mt-4 mb-3"
     >
       <header>
-        <h2 class="fw-bold fs-2 m-0">Blog Posts of user { userEmail }</h2>
+        <h2 class="fw-bold fs-2 m-0">
+          All Blog Posts since you have last visited!!!
+        </h2>
       </header>
 
       <!-- Button to use to navigate to the "Add a Blog Post Page" -->
@@ -34,6 +45,22 @@
             <h5 class="card-title fs-4 fw-bold mb-5 mt-2">
               {{ blogPost.title }}
             </h5>
+
+            <h5 class="card-title fs-4 fw-bold mb-5 mt-2">
+              {{ blogPost.author }}
+            </h5>
+
+            <h5 class="card-title fs-4 fw-bold mb-5 mt-2">
+              {{ blogPost.category.name }}
+            </h5>
+
+            <h5 class="card-title fs-4 fw-bold mb-5 mt-2">
+              {{ blogPost.creationDate }}
+            </h5>
+
+            <h5 class="card-title fs-4 fw-bold mb-5 mt-2">
+              {{ blogPost.likes }}
+            </h5>
           </header>
 
           <div
@@ -47,10 +74,14 @@
 
 <script>
 // import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { mapGetters } from "vuex";
 
 export default {
   name: "BlogPostsList",
   props: ["blogPosts"],
+  computed: {
+    ...mapGetters("auth", ["getLoggedInStatus", "getLoggedInUserData"]),
+  },
   //   components: { FontAwesomeIcon },
 };
 </script>
