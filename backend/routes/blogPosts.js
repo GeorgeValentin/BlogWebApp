@@ -9,14 +9,30 @@ const auth = require("../middleware/auth");
 router.route("/allBlogPosts").get(async (req, res) => {
   try {
     const blogPostsCollection = db.collection("blogPosts");
+    const usersCollection = db.collection("users");
     let blogPostsDocs = await blogPostsCollection.get();
     let response = [];
 
-    blogPostsDocs.forEach((blogPostDoc) => {
+    const blogPostsArray = blogPostsDocs.docs.map(async (blogPostDoc) => {
       const blogPostDocData = blogPostDoc.data();
 
-      response.push(blogPostDocData);
+      const userDocRef = usersCollection.doc(blogPostDocData.author);
+      const userDoc = await userDocRef.get();
+      const userDocData = userDoc.data();
+
+      // Destructure to exclude the 'author' property
+      const { author, ...blogPostWithoutAuthor } = blogPostDocData;
+
+      const blogPostWithAuthorName = {
+        ...blogPostWithoutAuthor,
+        author: userDocData.username,
+      };
+
+      return blogPostWithAuthorName;
     });
+
+    // Wait for all promises to resolve
+    response = await Promise.all(blogPostsArray);
 
     return res.status(200).json(response);
   } catch (err) {

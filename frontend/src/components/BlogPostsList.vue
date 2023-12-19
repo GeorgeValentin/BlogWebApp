@@ -82,6 +82,7 @@ export default {
   computed: {
     ...mapGetters("auth", ["getLoggedInStatus", "getLoggedInUserData"]),
   },
+  methods: {},
   //   components: { FontAwesomeIcon },
 };
 </script>

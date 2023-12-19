@@ -69,15 +69,3 @@ export const blogPostsModule = {
     },
   },
 };
-
-/*
-author
-blogPostId
-category
-name
-comments
-content
-creationDate
-likes
-title
- */

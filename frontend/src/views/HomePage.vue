@@ -21,7 +21,6 @@
 
 <script>
 // @ is an alias to /src
-// import DataService from "@/services/data.service";
 import { mapGetters, mapActions } from "vuex";
 import BlogPostsList from "@/components/BlogPostsList";
 // import HomeAppDescription from "@/components/HomeAppDescription.vue";
