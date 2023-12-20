@@ -30,42 +30,78 @@
       </div> -->
     </div>
 
-    <div class="row justify-content-center py-3 px-0">
+    <div
+      class="flex-outer-container row justify-content-center py-5 px-5 gap-4"
+    >
       <div
         class="card-container text-center col-xxl-6 col-xl-4 col-md-12 col-sm-4 p-0"
         v-for="blogPost in blogPosts"
         :key="blogPost.blogPostId"
       >
-        <div class="card border-2 border-light rounded-0" style="width: 20rem">
+        <div class="card border-2 border-light rounded" style="width: 20rem">
           <!-- Blog Post Avatar -> We'll see if we'll add it -->
-        </div>
 
-        <div class="card-body">
-          <header>
-            <h5 class="card-title fs-4 fw-bold mb-5 mt-2">
-              {{ blogPost.title }}
-            </h5>
+          <div class="card-body">
+            <header
+              class="card-title d-flex justify-content-between align-items-center"
+            >
+              <div
+                class="fs-5 fw-bold d-flex justify-content-center align-items-center gap-2"
+              >
+                <img
+                  src="../assets/blogger.png"
+                  alt="blogger-img"
+                  class="blogger-img"
+                />
+                <div class="fst-italic fs-5 fw-bold">
+                  {{ blogPost.author }}
+                </div>
+              </div>
 
-            <h5 class="card-title fs-4 fw-bold mb-5 mt-2">
-              {{ blogPost.author }}
-            </h5>
+              <div
+                class="d-flex justify-content-center align-items-center gap-2"
+              >
+                <img
+                  class="category-img"
+                  src="../assets/blog.png"
+                  alt="category-img"
+                />
 
-            <h5 class="card-title fs-4 fw-bold mb-5 mt-2">
-              {{ blogPost.category.name }}
-            </h5>
+                <div class="fs-6">
+                  {{ blogPost.category.name }}
+                </div>
+              </div>
+            </header>
 
-            <h5 class="card-title fs-4 fw-bold mb-5 mt-2">
+            <div class="blog-post-title-container fs-6 fst-italic">
+              "{{ capitalizeTitle(blogPost.title) }}"
+            </div>
+
+            <div class="creation-date-container fs-6 fst-italic">
               {{ blogPost.creationDate }}
-            </h5>
+            </div>
 
-            <h5 class="card-title fs-4 fw-bold mb-5 mt-2">
+            <div
+              class="like-container fs-6 fw-bold fst-italic d-flex justify-content-center align-items-center gap-2"
+            >
+              <img class="like-img" src="../assets/like.png" alt="like-img" />
               {{ blogPost.likes }}
-            </h5>
-          </header>
+            </div>
 
-          <div
-            class="d-flex justify-content-between align-items-center border border-2 border-light p-2 my-2"
-          ></div>
+            <div
+              class="content-container d-flex flex-column justify-content-between align-items-center border border-2 border-dark rounded p-2 my-2"
+            >
+              <div class="content fs-6 fw-bold fst-italic">
+                <!-- "{{ blogPost.content }}" -->
+
+                "{{ formatBlogPostContent(blogPost.content) }}"
+                <span class="fw-bold fst-italic">...</span>
+              </div>
+            </div>
+
+            <!-- Navigate to Blog Post page where the user can read it all -->
+            <button class="read-more-btn fw-bold">Read More</button>
+          </div>
         </div>
       </div>
     </div>
@@ -79,10 +115,23 @@ import { mapGetters } from "vuex";
 export default {
   name: "BlogPostsList",
   props: ["blogPosts"],
+  data() {
+    return {
+      contentSize: 36,
+    };
+  },
   computed: {
     ...mapGetters("auth", ["getLoggedInStatus", "getLoggedInUserData"]),
   },
-  methods: {},
+  methods: {
+    formatBlogPostContent(content) {
+      let arrOfContentWords = content.split(" ");
+      return arrOfContentWords.slice(0, this.contentSize).join(" ");
+    },
+    capitalizeTitle(title) {
+      return title.charAt(0).toUpperCase() + title.substring(1);
+    },
+  },
   //   components: { FontAwesomeIcon },
 };
 </script>
@@ -90,19 +139,81 @@ export default {
 <style scoped>
 .card-container {
   flex-basis: fit-content;
+  position: relative;
 }
 
-.card-container:hover {
+/* .card-container:hover {
   scale: 1.02;
-}
+} */
 
 .card {
-  background-color: #0c2461;
-  color: #c7ecee;
+  background-color: #f6e58d;
+  color: #000;
+  height: 19rem;
+  width: 32rem !important;
 }
 
-.card:hover {
-  background-color: #0a3d62;
-  color: #dff9fb;
+.content-container {
+  height: 13rem;
+}
+
+.content {
+  text-align: justify;
+  height: 100%;
+}
+
+.read-more-btn {
+  margin-top: 2rem;
+  color: #22a6b3 !important;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  background-color: transparent;
+  border: none;
+  position: absolute;
+  bottom: 0.15rem;
+  right: 1rem;
+}
+
+.read-more-btn:hover {
+  color: #7ed6df !important;
+}
+
+.creation-date-container {
+  position: absolute;
+  bottom: 0.55rem;
+  left: 1.1rem;
+}
+
+.like-container {
+  position: absolute;
+  bottom: 0.55rem;
+  left: 44%;
+}
+
+.blog-post-title-container {
+  position: absolute;
+  top: 1.2rem;
+  left: 45%;
+}
+
+.like-img {
+  width: 1.25rem;
+}
+
+.category-img {
+  width: 1.4rem;
+}
+
+.blogger-img {
+  width: 2rem;
+}
+
+@media (max-width: 850px) {
+  .flex-outer-container {
+    padding-inline: 1.5rem !important;
+  }
+  .card {
+    width: 22.5rem !important;
+  }
 }
 </style>
