@@ -13,6 +13,12 @@ class BlogPostsService {
       `${API_URL}/users/${String(loggedInUserId)}/blogPosts`
     );
   }
+
+  // async getBlogPostById(loggedInUserId, blogPostId) {
+  //   return await axios.get(
+  //     `${API_URL}/users/${String(loggedInUserId)}/blogPosts/${blogPostId}`
+  //   );
+  // }
 }
 
 export default new BlogPostsService();

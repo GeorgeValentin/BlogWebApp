@@ -25,6 +25,7 @@ export const blogPostsModule = {
     getEntireListOfBlogPosts({ commit }) {
       return BlogPostsService.getAllBlogPostsEndpoint().then(
         (response) => {
+          console.log(response);
           commit("getBlogPostsSuccess", response);
           return Promise.resolve(response);
         },
@@ -46,6 +47,18 @@ export const blogPostsModule = {
         }
       );
     },
+    // getBlogPostById({ commit }, userId, blogPostId) {
+    //   return BlogPostsService.getBlogPostById(userId, blogPostId).then(
+    //     (response) => {
+    //       commit("getBlogPostSuccess", response);
+    //       return Promise.resolve(response);
+    //     },
+    //     (error) => {
+    //       commit("getBlogPostFailure");
+    //       return Promise.reject(error);
+    //     }
+    //   );
+    // },
   },
   mutations: {
     getBlogPostsSuccess(state, blogPosts) {
@@ -55,6 +68,13 @@ export const blogPostsModule = {
     getBlogPostsFailure(state) {
       state.getBlogPostStatus = false;
     },
+    // getBlogPostSuccess(state, blogPost) {
+    //   this.blogPost = blogPost.data;
+    //   state.getBlogPostStatus = true;
+    // },
+    // getBlogPostFailure(state) {
+    //   state.getBlogPostStatus = false;
+    // },
     // getBlogPostsOfLoggedInUserSuccess(state, blogPosts) {
     //   state.blogPostsList = blogPosts.data;
     //   state.getBlogPostStatus = true;
@@ -67,5 +87,8 @@ export const blogPostsModule = {
     getBlogPosts: (state) => {
       return state.blogPostsList;
     },
+    // getBlogPost: (state) => {
+    //   return state.blogPost;
+    // },
   },
 };

@@ -20,6 +20,22 @@
         <Form @submit="handleRegister" :validation-schema="schema">
           <div v-if="!successful">
             <div>
+              <label class="fw-bold fs-4">Username</label>
+              <div class="d-flex flex-column m-auto mb-3">
+                <Field
+                  class="register-input fw-bold m-auto"
+                  name="username"
+                  type="text"
+                  v-model="user.username"
+                />
+                <ErrorMessage
+                  name="username"
+                  class="text-danger fw-bold fs-6 error-feedback"
+                />
+              </div>
+            </div>
+
+            <div>
               <label class="fw-bold fs-4">Email</label>
               <div class="d-flex flex-column m-auto mb-3">
                 <Field
@@ -108,6 +124,11 @@ export default {
         .required("Password is required!")
         .min(6, "Must be at least 6 characters!")
         .max(40, "Must be maximum 40 characters!"),
+      username: yup
+        .string()
+        .required("Username is required!")
+        .min(6, "Must be at least 6 characters!")
+        .max(40, "Must be maximum 40 characters!"),
     });
 
     return {
@@ -126,6 +147,7 @@ export default {
       this.user = {
         email: this.user.email,
         password: this.user.password,
+        username: this.user.username,
       };
 
       this.message = "";

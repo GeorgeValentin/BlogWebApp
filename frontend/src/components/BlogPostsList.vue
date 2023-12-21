@@ -5,6 +5,10 @@
       v-if="getLoggedInStatus === true"
       class="d-flex justify-content-center align-items-center gap-3 mt-4 mb-3"
     >
+      <header>
+        <h2 class="fw-bold fs-2 m-0">Blog Posts of logged in user</h2>
+      </header>
+
       User is Logged in
     </div>
 
@@ -54,7 +58,7 @@
                   class="blogger-img"
                 />
                 <div class="fst-italic fs-5 fw-bold">
-                  {{ blogPost.author }}
+                  {{ blogPost.authorName }}
                 </div>
               </div>
 
@@ -99,8 +103,13 @@
               </div>
             </div>
 
-            <!-- Navigate to Blog Post page where the user can read it all -->
-            <button class="read-more-btn fw-bold">Read More</button>
+            <!-- Navigate to Blog Post page where the user can read it all (must be logged in)-->
+            <button
+              class="read-more-btn fw-bold"
+              @click="handleReadMore(blogPost.blogPostId)"
+            >
+              Read More
+            </button>
           </div>
         </div>
       </div>
@@ -130,6 +139,15 @@ export default {
     },
     capitalizeTitle(title) {
       return title.charAt(0).toUpperCase() + title.substring(1);
+    },
+    handleReadMore(blogPostId) {
+      if (this.getLoggedInStatus === false) {
+        // navigate to login
+        this.$router.push("/login");
+      } else {
+        // navigate to BlogPost Page
+        this.$router.push(`/blogPostPage/${blogPostId}`);
+      }
     },
   },
   //   components: { FontAwesomeIcon },

@@ -3,6 +3,7 @@ import HomePage from "../views/HomePage";
 import NotFoundPage from "../views/NotFoundPage";
 import RegisterPage from "../views/RegisterPage";
 import LoginPage from "../views/LoginPage";
+import BlogPostPage from "../views/BlogPostPage";
 
 const routes = [
   {
@@ -19,6 +20,11 @@ const routes = [
     path: "/login",
     name: "login",
     component: LoginPage,
+  },
+  {
+    path: "/blogPostPage/:blogPostId",
+    name: "blogPostPage",
+    component: BlogPostPage,
   },
   // this will match any route path that is not specified above
   {

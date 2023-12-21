@@ -16,16 +16,16 @@ router.route("/allBlogPosts").get(async (req, res) => {
     const blogPostsArray = blogPostsDocs.docs.map(async (blogPostDoc) => {
       const blogPostDocData = blogPostDoc.data();
 
-      const userDocRef = usersCollection.doc(blogPostDocData.author);
+      const userDocRef = usersCollection.doc(blogPostDocData.authorId);
       const userDoc = await userDocRef.get();
       const userDocData = userDoc.data();
 
       // Destructure to exclude the 'author' property
-      const { author, ...blogPostWithoutAuthor } = blogPostDocData;
+      const { ...blogPostCopy } = blogPostDocData;
 
       const blogPostWithAuthorName = {
-        ...blogPostWithoutAuthor,
-        author: userDocData.username,
+        ...blogPostCopy,
+        authorName: userDocData.username,
       };
 
       return blogPostWithAuthorName;
@@ -56,7 +56,7 @@ router
       blogPostsDocs.forEach((blogPostDoc) => {
         const blogPostDocData = blogPostDoc.data();
 
-        if (blogPostDocData.author !== userId) response.push(blogPostDocData);
+        if (blogPostDocData.authorId !== userId) response.push(blogPostDocData);
       });
 
       return res.status(200).json(response);
@@ -89,7 +89,7 @@ router
         );
 
         for (let blogPost of blogPostsArray) {
-          blogPost.author = userId;
+          blogPost.authorId = userId;
           blogPost.category = categoriesArray[utils.randomizeArray(3)];
 
           const addedBlogPost = await blogPostsCollection.add(blogPost);
@@ -106,7 +106,7 @@ router
       } else {
         // Retrieve and filter blog posts for the user
         const blogPostsQuerySnapshot = await blogPostsCollection
-          .where("author", "==", userId)
+          .where("authorId", "==", userId)
           .get();
         blogPostsQuerySnapshot.forEach((blogPostDoc) => {
           const blogPostDocData = blogPostDoc.data();
@@ -136,7 +136,7 @@ router
 
       const blogPostsCollection = db.collection("blogPosts");
 
-      blogPostToAdd.author = userId;
+      blogPostToAdd.authorId = userId;
       blogPostToAdd.likes = 0;
       blogPostToAdd.comments = [];
 

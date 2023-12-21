@@ -33,6 +33,7 @@ class AuthService {
       .post(API_URL + "register", {
         email: user.email,
         password: user.password,
+        username: user.username,
       })
       .then((response) => {
         console.log(response);
