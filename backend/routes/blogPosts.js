@@ -20,7 +20,6 @@ router.route("/allBlogPosts").get(async (req, res) => {
       const userDoc = await userDocRef.get();
       const userDocData = userDoc.data();
 
-      // Destructure to exclude the 'author' property
       const { ...blogPostCopy } = blogPostDocData;
 
       const blogPostWithAuthorName = {
@@ -50,16 +49,55 @@ router
       const userId = req.params.userId;
 
       const blogPostsCollection = db.collection("blogPosts");
+      const usersCollection = db.collection("users");
+
       let blogPostsDocs = await blogPostsCollection.get();
       let response = [];
 
-      blogPostsDocs.forEach((blogPostDoc) => {
+      // blogPostsDocs.forEach((blogPostDoc) => {
+      //   const blogPostDocData = blogPostDoc.data();
+
+      //   if (blogPostDocData.authorId !== userId) {
+      //     const { ...blogPostCopy } = blogPostDocData;
+
+      //     const userDocRef = usersCollection.doc(blogPostDocData.authorId)
+      //     const userData = await userDocRef.get
+      //     const blogPostWithAuthorName = {
+      //       ...blogPostCopy,
+      //       authorName: req.userDocData.username,
+      //     };
+
+      //     response.push(blogPostWithAuthorName);
+      //   }
+      // });
+
+      const blogPostsArray = blogPostsDocs.docs.map(async (blogPostDoc) => {
         const blogPostDocData = blogPostDoc.data();
 
-        if (blogPostDocData.authorId !== userId) response.push(blogPostDocData);
+        if (blogPostDocData.authorId !== userId) {
+          const userDocRef = usersCollection.doc(blogPostDocData.authorId);
+          const userDoc = await userDocRef.get();
+          const userDocData = userDoc.data();
+          const { ...blogPostCopy } = blogPostDocData;
+
+          const blogPostWithAuthorName = {
+            ...blogPostCopy,
+            authorName: userDocData.username,
+          };
+
+          return blogPostWithAuthorName;
+        }
       });
 
-      return res.status(200).json(response);
+      // Wait for all promises to resolve
+      response = await Promise.all(blogPostsArray);
+
+      // Filter out null & undefined values
+      const filteredResponse = response.filter(
+        (elem) => elem !== null && elem !== undefined
+      );
+
+      return res.status(200).json(filteredResponse);
     } catch (err) {
       console.log(err);
       return res.status(500).json(err);
@@ -74,6 +112,7 @@ router
       const userId = req.params.userId;
       const blogPostsCollection = db.collection("blogPosts");
       let response = [];
+      let blogPostsArrCopy = [];
 
       // -> if the blogPosts of the loggedIn user have no docs then randomly generate them with chance.js
       // => 3 records generated
@@ -99,10 +138,21 @@ router
           await blogPostsCollection.doc(addedBlogPost.id).update(blogPost);
         }
 
+        for (let blogPost of blogPostsArray) {
+          const { ...blogPostCopy } = blogPost;
+
+          const blogPostWithAuthorName = {
+            ...blogPostCopy,
+            authorName: req.userDocData.username,
+          };
+
+          blogPostsArrCopy.push(blogPostWithAuthorName);
+        }
+
         // 1. storing blogPosts array inside the user
         req.userDocRef.update({ blogPosts: blogPostsArray });
 
-        response = blogPostsArray;
+        response = blogPostsArrCopy;
       } else {
         // Retrieve and filter blog posts for the user
         const blogPostsQuerySnapshot = await blogPostsCollection
@@ -110,7 +160,15 @@ router
           .get();
         blogPostsQuerySnapshot.forEach((blogPostDoc) => {
           const blogPostDocData = blogPostDoc.data();
-          response.push(blogPostDocData);
+
+          const { ...blogPostCopy } = blogPostDocData;
+
+          const blogPostWithAuthorName = {
+            ...blogPostCopy,
+            authorName: req.userDocData.username,
+          };
+
+          response.push(blogPostWithAuthorName);
         });
       }
 
@@ -155,11 +213,17 @@ router
     }
   });
 
+// -> get Blog Post by its ID
+router.route("/blogPosts/:blogPostId").get(checkBlogPost, async (req, res) => {
+  console.log(req.params.blogPostId);
+  return res.status(200).json(req.blogPostDocData);
+});
+
 router
   .route("/users/:userId/blogPosts/:blogPostId")
   // -> get blog post by id (DONE)
   .get(checkUser, checkBlogPost, async (req, res) => {
-    res.status(200).json(req.blogPostDocData);
+    return res.status(200).json(req.blogPostDocData);
   })
   // -> update blog post (DONE)
   .put(auth, checkUser, checkBlogPost, async (req, res) => {
@@ -189,7 +253,7 @@ router
     }
     await req.userDocRef.update({ blogPosts: req.userDocData.blogPosts });
 
-    res.status(200).json({
+    return res.status(200).json({
       message: `The blog post with id {${blogPostId}} has been updated!`,
     });
   })

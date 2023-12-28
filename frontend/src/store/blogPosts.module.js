@@ -2,17 +2,18 @@ import BlogPostsService from "@/services/blogPosts.service";
 
 const initialState = {
   blogPostsList: [],
-  blogPost: {
-    author: "",
-    blogPostId: "",
-    category: "",
-    name: "",
-    comments: "",
-    content: "",
-    creationDate: "",
-    likes: "",
-    title: "",
-  },
+  // blogPost: {
+  //   author: "",
+  //   blogPostId: "",
+  //   category: "",
+  //   name: "",
+  //   comments: "",
+  //   content: "",
+  //   creationDate: "",
+  //   likes: "",
+  //   title: "",
+  // },
+  blogPost: {},
   getBlogPostStatus: false,
 };
 
@@ -47,18 +48,30 @@ export const blogPostsModule = {
         }
       );
     },
-    // getBlogPostById({ commit }, userId, blogPostId) {
-    //   return BlogPostsService.getBlogPostById(userId, blogPostId).then(
-    //     (response) => {
-    //       commit("getBlogPostSuccess", response);
-    //       return Promise.resolve(response);
-    //     },
-    //     (error) => {
-    //       commit("getBlogPostFailure");
-    //       return Promise.reject(error);
-    //     }
-    //   );
-    // },
+    getBlogPostsOfCommunity({ commit }, userId) {
+      return BlogPostsService.getBlogPostsOfOthers(userId).then(
+        (response) => {
+          commit("getBlogPostsSuccess", response);
+          return Promise.resolve(response);
+        },
+        (error) => {
+          commit("getBlogPostsFailure");
+          return Promise.reject(error);
+        }
+      );
+    },
+    getBlogPostByIdOfLoggedInUser({ commit }, { userId, blogPostId }) {
+      return BlogPostsService.getBlogPostById(userId, blogPostId).then(
+        (response) => {
+          commit("getBlogPostByIdSuccess", response);
+          return Promise.resolve(response);
+        },
+        (error) => {
+          commit("getBlogPostByIdFailure");
+          return Promise.reject(error);
+        }
+      );
+    },
   },
   mutations: {
     getBlogPostsSuccess(state, blogPosts) {
@@ -68,13 +81,13 @@ export const blogPostsModule = {
     getBlogPostsFailure(state) {
       state.getBlogPostStatus = false;
     },
-    // getBlogPostSuccess(state, blogPost) {
-    //   this.blogPost = blogPost.data;
-    //   state.getBlogPostStatus = true;
-    // },
-    // getBlogPostFailure(state) {
-    //   state.getBlogPostStatus = false;
-    // },
+    getBlogPostByIdSuccess(state, blogPost) {
+      state.blogPost = blogPost.data;
+      state.getBlogPostStatus = true;
+    },
+    getBlogPostByIdFailure(state) {
+      state.getBlogPostStatus = false;
+    },
     // getBlogPostsOfLoggedInUserSuccess(state, blogPosts) {
     //   state.blogPostsList = blogPosts.data;
     //   state.getBlogPostStatus = true;
@@ -87,8 +100,8 @@ export const blogPostsModule = {
     getBlogPosts: (state) => {
       return state.blogPostsList;
     },
-    // getBlogPost: (state) => {
-    //   return state.blogPost;
-    // },
+    getBlogPost: (state) => {
+      return state.blogPost;
+    },
   },
 };

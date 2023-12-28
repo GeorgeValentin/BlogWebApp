@@ -2,20 +2,21 @@
   <!-- If not logged in then show all blog posts, but do not allow the user that sees them to do anything -->
   <div v-if="getLoggedInStatus === false">
     <!-- <home-app-description /> -->
-    <blog-posts-list :blogPosts="getBlogPosts" />
+    <blog-posts-list :blogPosts="getBlogPosts" :pageName="home" />
   </div>
 
   <!-- Show the blog posts of the user that is logged in 
       - he will be able to add more posts
       - UPDATE/DELETE the existing -->
-  <!-- -> also create a button in  the Menu called "community@ or something similar that allows the user that is logged in the other user's posts, comment and like them  -->
+  <!-- -> also create a button in  the Menu called "community" or something similar that allows
+  the user that is logged in the other user's posts, comment and like them  -->
   <div v-else>
     <!-- <div v-for="blogPost in getBlogPosts" :key="blogPost.blogPostId">
     <div>---------</div>
     <div>{{ blogPost }}</div>
   </div> -->
 
-    <blog-posts-list :blogPosts="getBlogPosts" />
+    <blog-posts-list :blogPosts="getBlogPosts" :pageName="home" />
   </div>
 </template>
 
@@ -26,7 +27,7 @@ import BlogPostsList from "@/components/BlogPostsList";
 // import HomeAppDescription from "@/components/HomeAppDescription.vue";
 
 export default {
-  name: "HomeView",
+  name: "HomePage",
   components: { BlogPostsList },
   computed: {
     ...mapGetters("auth", ["getLoggedInStatus", "getLoggedInUserData"]),
@@ -48,11 +49,6 @@ export default {
       "getBlogPostsOfLoggedInUser",
       "getEntireListOfBlogPosts",
     ]),
-    // getBlogPostsOfUser: async function (userId) {
-    //   if (this.getLoggedInUserData !== null) {
-    //     await this.getBlogPostsOfLoggedInUser(this.getLoggedInUserData.userId);
-    //   }
-    // },
     getBlogPostsOfUser: async function (userId) {
       await this.getBlogPostsOfLoggedInUser(userId);
     },

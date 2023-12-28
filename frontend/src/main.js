@@ -18,6 +18,8 @@ import {
   faLockOpen,
   faPen,
   faBook,
+  faRightFromBracket,
+  faUserGroup,
 } from "@fortawesome/free-solid-svg-icons";
 
 library.add(
@@ -28,7 +30,9 @@ library.add(
   faUserPlus,
   faLockOpen,
   faPen,
-  faBook
+  faBook,
+  faRightFromBracket,
+  faUserGroup
 );
 
 axios.defaults.baseURL = "http://localhost:8000/";

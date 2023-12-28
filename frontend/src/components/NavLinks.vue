@@ -10,11 +10,22 @@
         Hello <span class="fw-bold text-dark">{{ userEmail }}</span>
       </div>
 
+      <router-link to="/community" id="register-btn-container" class="nav-link">
+        <button
+          class="btn btn-outline-primary fw-bold border border-primary border-3"
+        >
+          <font-awesome-icon icon="user-group" />
+          Community
+        </button>
+      </router-link>
+
       <router-link to="/" id="logout-btn-container" class="nav-link">
         <button
           class="btn btn-dark fw-bold border border-dark border-3"
           @click="handleLogout"
         >
+          <font-awesome-icon icon="right-from-bracket" />
+
           Logout
         </button>
       </router-link>
@@ -24,14 +35,14 @@
       class="auth-links-container d-flex justify-content-center align-items-center gap-2"
       v-else
     >
-      <router-link to="/register" id="register-btn-container" class="nav-link">
+      <router-link to="/register" class="nav-link">
         <button class="btn btn-primary fw-bold border border-primary border-3">
           <font-awesome-icon icon="user-plus" />
           Register
         </button>
       </router-link>
 
-      <router-link to="/login" id="login-btn-container" class="nav-link">
+      <router-link to="/login" class="nav-link">
         <button
           class="btn btn-outline-primary fw-bold border border-primary border-3"
         >

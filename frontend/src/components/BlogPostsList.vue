@@ -1,29 +1,38 @@
 <template>
   <article class="container-fluid">
-    <!-- User is logged in -->
+    <!-- Community Page Title -->
     <div
-      v-if="getLoggedInStatus === true"
+      v-if="pageName === 'community'"
       class="d-flex justify-content-center align-items-center gap-3 mt-4 mb-3"
     >
       <header>
-        <h2 class="fw-bold fs-2 m-0">Blog Posts of logged in user</h2>
+        <h2 class="fw-bold fs-2 m-0">Community - What others are Posting</h2>
       </header>
-
-      User is Logged in
     </div>
 
-    <div
-      v-else
-      class="d-flex justify-content-center align-items-center gap-3 mt-4 mb-3"
-    >
-      <header>
-        <h2 class="fw-bold fs-2 m-0">
-          All Blog Posts since you have last visited!!!
-        </h2>
-      </header>
+    <div v-else>
+      <!-- User is logged in -->
+      <div
+        v-if="getLoggedInStatus === true"
+        class="d-flex justify-content-center align-items-center gap-3 mt-4 mb-3"
+      >
+        <header>
+          <h2 class="fw-bold fs-2 m-0">Blog Posts of logged in user</h2>
+        </header>
+      </div>
 
-      <!-- Button to use to navigate to the "Add a Blog Post Page" -->
-      <!-- <div class="text-center">
+      <div
+        v-else
+        class="d-flex justify-content-center align-items-center gap-3 mt-4 mb-3"
+      >
+        <header>
+          <h2 class="fw-bold fs-2 m-0">
+            All Blog Posts since you have last visited!!!
+          </h2>
+        </header>
+
+        <!-- Button to use to navigate to the "Add a Blog Post Page" -->
+        <!-- <div class="text-center">
         <button
           type="button"
           class="btn btn-outline-dark fw-bold fs-5 border border-3 border-dark"
@@ -32,6 +41,7 @@
           +
         </button>
       </div> -->
+      </div>
     </div>
 
     <div
@@ -123,7 +133,7 @@ import { mapGetters } from "vuex";
 
 export default {
   name: "BlogPostsList",
-  props: ["blogPosts"],
+  props: ["blogPosts", "pageName"],
   data() {
     return {
       contentSize: 36,
@@ -159,10 +169,6 @@ export default {
   flex-basis: fit-content;
   position: relative;
 }
-
-/* .card-container:hover {
-  scale: 1.02;
-} */
 
 .card {
   background-color: #f6e58d;
