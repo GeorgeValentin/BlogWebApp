@@ -66,6 +66,7 @@ router.route("/login").post(async (req, res) => {
       if (users.docs[index].data().email === email) {
         userToLogin = users.docs[index].data();
         userToLogin.userId = users.docs[index].id;
+        userToLogin.username = users.docs[index].data().username;
       }
     }
 
@@ -83,6 +84,7 @@ router.route("/login").post(async (req, res) => {
         let token = jwt.sign(tokenPayload, serverSecret, { expiresIn: "1h" });
 
         let currentDate = new Date();
+        loginResponse.username = userToLogin.username;
         loginResponse.userId = userToLogin.userId;
         loginResponse.token = token;
         loginResponse.message = "Logged in successfully!";

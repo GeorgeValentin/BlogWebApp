@@ -11,13 +11,15 @@
     </div>
 
     <div v-else>
-      <!-- User is logged in -->
+      <!-- Logged In User Title -->
       <div
         v-if="getLoggedInStatus === true"
         class="d-flex justify-content-center align-items-center gap-3 mt-4 mb-3"
       >
         <header>
-          <h2 class="fw-bold fs-2 m-0">Blog Posts of logged in user</h2>
+          <h2 class="fw-bold fs-2 m-0">
+            The Blog Posts of user {{ getLoggedInUserData.username }}
+          </h2>
         </header>
       </div>
 
@@ -25,6 +27,8 @@
         v-else
         class="d-flex justify-content-center align-items-center gap-3 mt-4 mb-3"
       >
+        <!-- No one logged in Title -->
+
         <header>
           <h2 class="fw-bold fs-2 m-0">
             All Blog Posts since you have last visited!!!

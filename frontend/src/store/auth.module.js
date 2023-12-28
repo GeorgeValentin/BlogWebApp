@@ -46,6 +46,7 @@ export const auth = {
       state.status.loggedIn = true;
       state.user = user;
       state.userEmail = user.loggedInUserEmail;
+      state.username = user.username;
     },
     loginFailure(state) {
       state.status.loggedIn = false;

@@ -26,7 +26,6 @@ export const blogPostsModule = {
     getEntireListOfBlogPosts({ commit }) {
       return BlogPostsService.getAllBlogPostsEndpoint().then(
         (response) => {
-          console.log(response);
           commit("getBlogPostsSuccess", response);
           return Promise.resolve(response);
         },

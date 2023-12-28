@@ -2,7 +2,7 @@
   <!-- If not logged in then show all blog posts, but do not allow the user that sees them to do anything -->
   <div v-if="getLoggedInStatus === false">
     <!-- <home-app-description /> -->
-    <blog-posts-list :blogPosts="getBlogPosts" :pageName="home" />
+    <blog-posts-list :blogPosts="getBlogPosts" pageName="home" />
   </div>
 
   <!-- Show the blog posts of the user that is logged in 
@@ -16,7 +16,7 @@
     <div>{{ blogPost }}</div>
   </div> -->
 
-    <blog-posts-list :blogPosts="getBlogPosts" :pageName="home" />
+    <blog-posts-list :blogPosts="getBlogPosts" pageName="home" />
   </div>
 </template>
 
