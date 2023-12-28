@@ -25,7 +25,6 @@
           @click="handleLogout"
         >
           <font-awesome-icon icon="right-from-bracket" />
-
           Logout
         </button>
       </router-link>

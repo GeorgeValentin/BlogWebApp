@@ -1,5 +1,5 @@
 import axios from "axios";
-// import authHeader from "./authHeader";
+import authHeader from "./auth.header";
 
 const API_URL = "api";
 
@@ -21,12 +21,16 @@ class BlogPostsService {
   }
 
   async getBlogPostById(loggedInUserId, blogPostId) {
-    return await axios
-      .get(`${API_URL}/users/${String(loggedInUserId)}/blogPosts/${blogPostId}`)
-      .then((response) => {
-        // localStorage.setItem("currentBlogPost", JSON.stringify(response.data));
-        return response;
-      });
+    return await axios.get(
+      `${API_URL}/users/${String(loggedInUserId)}/blogPosts/${blogPostId}`
+    );
+  }
+
+  async deleteBlogPost(loggedInUserId, blogPostId) {
+    return await axios.delete(
+      `${API_URL}/users/${String(loggedInUserId)}/blogPosts/${blogPostId}`,
+      { headers: authHeader() }
+    );
   }
 }
 

@@ -20,6 +20,8 @@ import {
   faBook,
   faRightFromBracket,
   faUserGroup,
+  faComment,
+  faTrashCan,
 } from "@fortawesome/free-solid-svg-icons";
 
 library.add(
@@ -32,7 +34,9 @@ library.add(
   faPen,
   faBook,
   faRightFromBracket,
-  faUserGroup
+  faUserGroup,
+  faComment,
+  faTrashCan
 );
 
 axios.defaults.baseURL = "http://localhost:8000/";

@@ -21,6 +21,11 @@ export default {
       }
     }
   },
+  mounted() {
+    if (this.getLoggedInStatus === false && this.getLoggedInUserData === null) {
+      this.$router.push("/");
+    }
+  },
   methods: {
     ...mapActions("blogPostsModule", ["getBlogPostsOfCommunity"]),
     getBlogPostsOfOthers: async function (userId) {

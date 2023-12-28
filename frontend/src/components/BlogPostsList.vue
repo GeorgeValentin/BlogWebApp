@@ -18,7 +18,7 @@
       >
         <header>
           <h2 class="fw-bold fs-2 m-0">
-            The Blog Posts of user {{ getLoggedInUserData.username }}
+            The Blog Posts of User "{{ getLoggedInUserData.username }}"
           </h2>
         </header>
       </div>
@@ -28,7 +28,6 @@
         class="d-flex justify-content-center align-items-center gap-3 mt-4 mb-3"
       >
         <!-- No one logged in Title -->
-
         <header>
           <h2 class="fw-bold fs-2 m-0">
             All Blog Posts since you have last visited!!!
@@ -60,8 +59,33 @@
           <!-- Blog Post Avatar -> We'll see if we'll add it -->
 
           <div class="card-body">
+            <div class="action-btns-container">
+              <button
+                class="delete-btn"
+                @click="
+                  handleDeleteBlogPost(
+                    getLoggedInUserData.userId,
+                    blogPost.blogPostId
+                  )
+                "
+              >
+                <img
+                  class="delete-img"
+                  src="../assets/delete.png"
+                  alt="delete-img"
+                />
+              </button>
+              <button class="update-btn">
+                <img
+                  class="update-img"
+                  src="../assets/update.png"
+                  alt="update-img"
+                />
+              </button>
+            </div>
+
             <header
-              class="card-title d-flex justify-content-between align-items-center"
+              class="card-title d-flex justify-content-around align-items-center"
             >
               <div
                 class="fs-5 fw-bold d-flex justify-content-center align-items-center gap-2"
@@ -100,18 +124,17 @@
             </div>
 
             <div
-              class="like-container fs-6 fw-bold fst-italic d-flex justify-content-center align-items-center gap-2"
+              class="comments-container fs-6 fw-bold fst-italic d-flex justify-content-center align-items-center gap-2"
             >
-              <img class="like-img" src="../assets/like.png" alt="like-img" />
-              {{ blogPost.likes }}
+              <font-awesome-icon icon="comment" />
+
+              {{ blogPost.comments.length }}
             </div>
 
             <div
               class="content-container d-flex flex-column justify-content-between align-items-center border border-2 border-dark rounded p-2 my-2"
             >
               <div class="content fs-6 fw-bold fst-italic">
-                <!-- "{{ blogPost.content }}" -->
-
                 "{{ formatBlogPostContent(blogPost.content) }}"
                 <span class="fw-bold fst-italic">...</span>
               </div>
@@ -132,12 +155,15 @@
 </template>
 
 <script>
-// import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { mapGetters } from "vuex";
+import { mapGetters, mapActions } from "vuex";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 export default {
   name: "BlogPostsList",
   props: ["blogPosts", "pageName"],
+  components: {
+    FontAwesomeIcon,
+  },
   data() {
     return {
       contentSize: 36,
@@ -145,8 +171,11 @@ export default {
   },
   computed: {
     ...mapGetters("auth", ["getLoggedInStatus", "getLoggedInUserData"]),
+    ...mapGetters("blogPostsModule", ["getBlogPosts"]),
   },
+  mounted() {},
   methods: {
+    ...mapActions("blogPostsModule", ["deleteBlogPost"]),
     formatBlogPostContent(content) {
       let arrOfContentWords = content.split(" ");
       return arrOfContentWords.slice(0, this.contentSize).join(" ");
@@ -163,8 +192,10 @@ export default {
         this.$router.push(`/blogPostPage/${blogPostId}`);
       }
     },
+    handleDeleteBlogPost: async function (userId, blogPostId) {
+      await this.deleteBlogPost({ userId, blogPostId });
+    },
   },
-  //   components: { FontAwesomeIcon },
 };
 </script>
 
@@ -212,7 +243,7 @@ export default {
   left: 1.1rem;
 }
 
-.like-container {
+.comments-container {
   position: absolute;
   bottom: 0.55rem;
   left: 44%;
@@ -224,15 +255,41 @@ export default {
   left: 45%;
 }
 
-.like-img {
+.comments-img {
   width: 1.25rem;
 }
 
 .category-img {
-  width: 1.4rem;
+  height: 1.4rem;
 }
 
 .blogger-img {
+  width: 2rem;
+}
+
+.action-btns-container {
+  position: relative;
+}
+
+.delete-btn {
+  position: absolute;
+  left: 0;
+  background: transparent;
+  border: none;
+}
+
+.update-btn {
+  position: absolute;
+  right: 0;
+  background: transparent;
+  border: none;
+}
+
+.delete-img {
+  width: 2rem;
+}
+
+.update-img {
   width: 2rem;
 }
 

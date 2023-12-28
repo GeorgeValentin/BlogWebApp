@@ -1,4 +1,4 @@
-const Chance = require('chance');
+const Chance = require("chance");
 const chanceInstance = new Chance();
 
 const generateBlogPost = () => {
@@ -9,7 +9,6 @@ const generateBlogPost = () => {
       string: true,
       year: chanceInstance.year({ min: 2010, max: 2023 }),
     }),
-    likes: chanceInstance.integer({ min: 0, max: 99999 }),
   };
 };
 

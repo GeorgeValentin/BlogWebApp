@@ -2,19 +2,9 @@ import BlogPostsService from "@/services/blogPosts.service";
 
 const initialState = {
   blogPostsList: [],
-  // blogPost: {
-  //   author: "",
-  //   blogPostId: "",
-  //   category: "",
-  //   name: "",
-  //   comments: "",
-  //   content: "",
-  //   creationDate: "",
-  //   likes: "",
-  //   title: "",
-  // },
   blogPost: {},
   getBlogPostStatus: false,
+  deleteBlogPostStatus: false,
 };
 
 export const blogPostsModule = {
@@ -71,6 +61,24 @@ export const blogPostsModule = {
         }
       );
     },
+    deleteBlogPost({ commit }, { userId, blogPostId }) {
+      return BlogPostsService.deleteBlogPost(userId, blogPostId).then(
+        async () => {
+          const updatedBlogPosts =
+            await BlogPostsService.getBlogPostsOfLoggedInUser(
+              userId,
+              blogPostId
+            );
+
+          commit("deletedBlogPostSuccess", updatedBlogPosts.data);
+          return Promise.resolve(updatedBlogPosts);
+        },
+        (error) => {
+          commit("deletedBlogPostFailure");
+          return Promise.reject(error);
+        }
+      );
+    },
   },
   mutations: {
     getBlogPostsSuccess(state, blogPosts) {
@@ -87,13 +95,13 @@ export const blogPostsModule = {
     getBlogPostByIdFailure(state) {
       state.getBlogPostStatus = false;
     },
-    // getBlogPostsOfLoggedInUserSuccess(state, blogPosts) {
-    //   state.blogPostsList = blogPosts.data;
-    //   state.getBlogPostStatus = true;
-    // },
-    // getBlogPostsOfLoggedInUserFailure(state) {
-    //   state.getBlogPostStatus = false;
-    // },
+    deletedBlogPostSuccess(state, updatedBlogPosts) {
+      state.blogPostsList = updatedBlogPosts;
+      state.deleteBlogPostStatus = true;
+    },
+    deletedBlogPostFailure(state) {
+      state.deleteBlogPostStatus = false;
+    },
   },
   getters: {
     getBlogPosts: (state) => {

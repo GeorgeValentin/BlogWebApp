@@ -54,23 +54,6 @@ router
       let blogPostsDocs = await blogPostsCollection.get();
       let response = [];
 
-      // blogPostsDocs.forEach((blogPostDoc) => {
-      //   const blogPostDocData = blogPostDoc.data();
-
-      //   if (blogPostDocData.authorId !== userId) {
-      //     const { ...blogPostCopy } = blogPostDocData;
-
-      //     const userDocRef = usersCollection.doc(blogPostDocData.authorId)
-      //     const userData = await userDocRef.get
-      //     const blogPostWithAuthorName = {
-      //       ...blogPostCopy,
-      //       authorName: req.userDocData.username,
-      //     };
-
-      //     response.push(blogPostWithAuthorName);
-      //   }
-      // });
-
       const blogPostsArray = blogPostsDocs.docs.map(async (blogPostDoc) => {
         const blogPostDocData = blogPostDoc.data();
 
@@ -195,7 +178,6 @@ router
       const blogPostsCollection = db.collection("blogPosts");
 
       blogPostToAdd.authorId = userId;
-      blogPostToAdd.likes = 0;
       blogPostToAdd.comments = [];
 
       const addedBlogPost = await blogPostsCollection.add(blogPostToAdd);
@@ -218,35 +200,6 @@ router
 //   console.log(req.params.blogPostId);
 //   return res.status(200).json(req.blogPostDocData);
 // });
-
-// -> like the blog post of the user's blog post passed in the route
-// NOTE: The Logged In user can do it to other user's posts
-router
-  .route("/users/:userId/blogPosts/:blogPostId/likeBlogPost")
-  .put(auth, checkUser, checkBlogPost, async (req, res) => {
-    const { blogPostId, userId } = req.params;
-    let blogPostData = req.blogPostDocData;
-    const loggedInUser = req.user;
-
-    if (loggedInUser.userId === userId) {
-      return res.status(400).json({
-        message: `You can't like your own post!`,
-      });
-    }
-    blogPostData.likes = blogPostData.likes + 1;
-    await req.blogPostDocRef.update(blogPostData);
-
-    for (const blogPost of req.userDocData.blogPosts) {
-      if (blogPost.blogPostId === blogPostId) {
-        blogPost.likes = blogPostData.likes;
-      }
-    }
-    await req.userDocRef.update({ blogPosts: req.userDocData.blogPosts });
-
-    return res.status(200).json({
-      message: `The likes of the blog post with id {${blogPostId}} has increased!`,
-    });
-  });
 
 router
   .route("/users/:userId/blogPosts/:blogPostId")
