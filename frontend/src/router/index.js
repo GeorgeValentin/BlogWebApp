@@ -5,6 +5,7 @@ import RegisterPage from "../views/RegisterPage";
 import LoginPage from "../views/LoginPage";
 import BlogPostPage from "../views/BlogPostPage";
 import CommunityPage from "../views/CommunityPage";
+import AddBlogPostPage from "../views/AddBlogPostPage";
 
 const routes = [
   {
@@ -26,6 +27,11 @@ const routes = [
     path: "/community",
     name: "community",
     component: CommunityPage,
+  },
+  {
+    path: "/addBlogPost",
+    name: "addBlogPost",
+    component: AddBlogPostPage,
   },
   {
     path: "/blogPostPage/:blogPostId",

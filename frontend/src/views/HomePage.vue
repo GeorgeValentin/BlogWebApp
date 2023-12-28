@@ -16,7 +16,12 @@
     <div>{{ blogPost }}</div>
   </div> -->
 
-    <blog-posts-list :blogPosts="getBlogPosts" pageName="home" />
+    <blog-posts-list
+      :blogPosts="getBlogPosts"
+      pageName="home"
+      @delete="handleDeleteBlogPost"
+      @edit="handleEditBlogPost"
+    />
   </div>
 </template>
 
@@ -48,6 +53,7 @@ export default {
     ...mapActions("blogPostsModule", [
       "getBlogPostsOfLoggedInUser",
       "getEntireListOfBlogPosts",
+      "deleteBlogPost",
     ]),
     getBlogPostsOfUser: async function (userId) {
       await this.getBlogPostsOfLoggedInUser(userId);
@@ -55,12 +61,12 @@ export default {
     getAllBlogPosts: async function () {
       await this.getEntireListOfBlogPosts();
     },
-    // -> to be implemented
-    // getBlogPostsOfOthers: async function () {
-    //   if (this.getLoggedInUserData !== null) {
-    //     await this.getBlogPostsOfLoggedInUser(this.getLoggedInUserData.userId);
-    //   }
-    // },
+    handleDeleteBlogPost: async function (userId, blogPostId) {
+      await this.deleteBlogPost({ userId, blogPostId });
+    },
+    handleEditBlogPost: function (blogPostsId) {
+      this.$router.push(`/blogPostPage/${blogPostsId}`);
+    },
   },
 };
 

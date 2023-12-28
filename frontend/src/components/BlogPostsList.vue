@@ -59,33 +59,40 @@
           <!-- Blog Post Avatar -> We'll see if we'll add it -->
 
           <div class="card-body">
-            <div class="action-btns-container">
-              <button
-                class="delete-btn"
-                @click="
-                  handleDeleteBlogPost(
-                    getLoggedInUserData.userId,
-                    blogPost.blogPostId
-                  )
-                "
-              >
-                <img
-                  class="delete-img"
-                  src="../assets/delete.png"
-                  alt="delete-img"
-                />
-              </button>
-              <button class="update-btn">
-                <img
-                  class="update-img"
-                  src="../assets/update.png"
-                  alt="update-img"
-                />
-              </button>
+            <div v-if="pageName === 'home' && getLoggedInStatus === true">
+              <div class="action-btns-container">
+                <button
+                  class="delete-btn"
+                  @click="
+                    $emit(
+                      'delete',
+                      getLoggedInUserData.userId,
+                      blogPost.blogPostId
+                    )
+                  "
+                >
+                  <img
+                    class="delete-img"
+                    src="../assets/delete.png"
+                    alt="delete-img"
+                  />
+                </button>
+
+                <button
+                  class="update-btn"
+                  @click="$emit('edit', blogPost.blogPostId)"
+                >
+                  <img
+                    class="update-img"
+                    src="../assets/update.png"
+                    alt="update-img"
+                  />
+                </button>
+              </div>
             </div>
 
             <header
-              class="card-title d-flex justify-content-around align-items-center"
+              class="card-title d-flex justify-content-center align-items-center gap-5"
             >
               <div
                 class="fs-5 fw-bold d-flex justify-content-center align-items-center gap-2"
@@ -100,6 +107,10 @@
                 </div>
               </div>
 
+              <div class="fs-6 fst-italic">
+                "{{ capitalizeTitle(blogPost.title) }}"
+              </div>
+
               <div
                 class="d-flex justify-content-center align-items-center gap-2"
               >
@@ -110,14 +121,10 @@
                 />
 
                 <div class="fs-6">
-                  {{ blogPost.category.name }}
+                  {{ blogPost.category }}
                 </div>
               </div>
             </header>
-
-            <div class="blog-post-title-container fs-6 fst-italic">
-              "{{ capitalizeTitle(blogPost.title) }}"
-            </div>
 
             <div class="creation-date-container fs-6 fst-italic">
               {{ blogPost.creationDate }}
@@ -192,9 +199,6 @@ export default {
         this.$router.push(`/blogPostPage/${blogPostId}`);
       }
     },
-    handleDeleteBlogPost: async function (userId, blogPostId) {
-      await this.deleteBlogPost({ userId, blogPostId });
-    },
   },
 };
 </script>
@@ -209,7 +213,7 @@ export default {
   background-color: #f6e58d;
   color: #000;
   height: 19rem;
-  width: 32rem !important;
+  width: 36rem !important;
 }
 
 .content-container {
@@ -247,12 +251,6 @@ export default {
   position: absolute;
   bottom: 0.55rem;
   left: 44%;
-}
-
-.blog-post-title-container {
-  position: absolute;
-  top: 1.2rem;
-  left: 45%;
 }
 
 .comments-img {

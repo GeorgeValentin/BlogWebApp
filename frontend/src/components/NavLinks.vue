@@ -10,7 +10,16 @@
         Hello <span class="fw-bold text-dark">{{ userEmail }}</span>
       </div>
 
-      <router-link to="/community" id="register-btn-container" class="nav-link">
+      <router-link to="/addBlogPost" class="nav-link">
+        <button
+          class="btn btn-outline-info fw-bold border border-info border-3"
+        >
+          <font-awesome-icon icon="pen-nib" />
+          Write a Post
+        </button>
+      </router-link>
+
+      <router-link to="/community" class="nav-link">
         <button
           class="btn btn-outline-primary fw-bold border border-primary border-3"
         >
@@ -19,7 +28,7 @@
         </button>
       </router-link>
 
-      <router-link to="/" id="logout-btn-container" class="nav-link">
+      <router-link to="/" class="nav-link">
         <button
           class="btn btn-dark fw-bold border border-dark border-3"
           @click="handleLogout"

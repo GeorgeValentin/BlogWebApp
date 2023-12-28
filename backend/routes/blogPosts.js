@@ -112,7 +112,9 @@ router
 
         for (let blogPost of blogPostsArray) {
           blogPost.authorId = userId;
-          blogPost.category = categoriesArray[utils.randomizeArray(3)];
+          const randomCategoryValue =
+            categoriesArray[utils.randomizeArray(3)].category;
+          blogPost.category = randomCategoryValue;
 
           const addedBlogPost = await blogPostsCollection.add(blogPost);
           blogPost.blogPostId = addedBlogPost.id;
@@ -205,7 +207,14 @@ router
   .route("/users/:userId/blogPosts/:blogPostId")
   // -> get blog post by id (DONE)
   .get(checkUser, checkBlogPost, async (req, res) => {
-    return res.status(200).json(req.blogPostDocData);
+    const { ...blogPostCopy } = req.blogPostDocData;
+
+    const blogPostWithAuthorName = {
+      ...blogPostCopy,
+      authorName: req.userDocData.username,
+    };
+
+    return res.status(200).json(blogPostWithAuthorName);
   })
   // -> update blog post (DONE)
   .put(auth, checkUser, checkBlogPost, async (req, res) => {

@@ -14,7 +14,7 @@ const generateBlogPost = () => {
 
 const generateCategory = () => {
   return {
-    name: chanceInstance.word({ length: 7 }),
+    category: chanceInstance.word({ length: 7 }),
   };
 };
 

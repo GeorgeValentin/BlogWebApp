@@ -4,6 +4,7 @@ const initialState = {
   blogPostsList: [],
   blogPost: {},
   getBlogPostStatus: false,
+  updatedBlogPostStatus: false,
   deleteBlogPostStatus: false,
 };
 
@@ -61,6 +62,23 @@ export const blogPostsModule = {
         }
       );
     },
+    updateBlogPost({ commit }, { userId, blogPostId, blogPostToUpdate }) {
+      return BlogPostsService.editBlogPost(
+        userId,
+        blogPostId,
+        blogPostToUpdate
+      ).then(
+        (response) => {
+          console.log(response);
+          commit("updatedBlogPostSuccess", response);
+          return Promise.resolve(response);
+        },
+        (error) => {
+          commit("updatedBlogPostFailure");
+          return Promise.reject(error);
+        }
+      );
+    },
     deleteBlogPost({ commit }, { userId, blogPostId }) {
       return BlogPostsService.deleteBlogPost(userId, blogPostId).then(
         async () => {
@@ -95,6 +113,12 @@ export const blogPostsModule = {
     getBlogPostByIdFailure(state) {
       state.getBlogPostStatus = false;
     },
+    updatedBlogPostSuccess(state) {
+      state.updatedBlogPostStatus = true;
+    },
+    updatedBlogPostFailure(state) {
+      state.updatedBlogPostStatus = false;
+    },
     deletedBlogPostSuccess(state, updatedBlogPosts) {
       state.blogPostsList = updatedBlogPosts;
       state.deleteBlogPostStatus = true;
@@ -109,6 +133,9 @@ export const blogPostsModule = {
     },
     getBlogPost: (state) => {
       return state.blogPost;
+    },
+    getBlogPostUpdateStatus: (state) => {
+      return state.updatedBlogPostStatus;
     },
   },
 };
