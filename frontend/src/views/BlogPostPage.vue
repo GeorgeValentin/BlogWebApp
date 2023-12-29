@@ -8,6 +8,7 @@
           <h5 class="my-4 fw-bold fs-2">
             Blog post of author "{{ username }}"
           </h5>
+
           <img
             class="blog-post-img"
             src="../assets/blog-post.png"

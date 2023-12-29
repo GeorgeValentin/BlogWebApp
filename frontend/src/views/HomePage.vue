@@ -9,8 +9,8 @@
   </div>
 
   <!-- Show user's blog post (read/write, must be logged in) -->
-  <!-- -> also create a button in  the Menu called "community" or something similar that allows
-  the user that is logged in the other user's posts, comment and like them  -->
+  <!-- -> Make the "Community" button to allow the user that is logged in
+  to comment on other user's posts -->
   <div v-else>
     <blog-posts-list
       :blogPosts="getBlogPosts"

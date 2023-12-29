@@ -141,7 +141,7 @@ export default {
     };
   },
   methods: {
-    // -> map the actions from the 'auth@ vuex module
+    // -> map the actions from the "auth" vuex module
     ...mapActions("auth", ["register"]),
     handleRegister: async function () {
       this.user = {
