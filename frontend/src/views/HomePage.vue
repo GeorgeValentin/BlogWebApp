@@ -1,26 +1,23 @@
 <template>
-  <!-- If not logged in then show all blog posts, but do not allow the user that sees them to do anything -->
+  <!-- Show all Blog Posts (Read-Only) -->
   <div v-if="getLoggedInStatus === false">
-    <!-- <home-app-description /> -->
-    <blog-posts-list :blogPosts="getBlogPosts" pageName="home" />
+    <blog-posts-list
+      :blogPosts="getBlogPosts"
+      pageName="home"
+      :errorMsg="errorMessage"
+    />
   </div>
 
-  <!-- Show the blog posts of the user that is logged in 
-      - he will be able to add more posts
-      - UPDATE/DELETE the existing -->
+  <!-- Show user's blog post (read/write, must be logged in) -->
   <!-- -> also create a button in  the Menu called "community" or something similar that allows
   the user that is logged in the other user's posts, comment and like them  -->
   <div v-else>
-    <!-- <div v-for="blogPost in getBlogPosts" :key="blogPost.blogPostId">
-    <div>---------</div>
-    <div>{{ blogPost }}</div>
-  </div> -->
-
     <blog-posts-list
       :blogPosts="getBlogPosts"
       pageName="home"
       @delete="handleDeleteBlogPost"
       @edit="handleEditBlogPost"
+      :errorMsg="errorMessage"
     />
   </div>
 </template>
@@ -29,10 +26,15 @@
 // @ is an alias to /src
 import { mapGetters, mapActions } from "vuex";
 import BlogPostsList from "@/components/BlogPostsList";
-// import HomeAppDescription from "@/components/HomeAppDescription.vue";
+import { filterErrorMessages } from "../utils/utility";
 
 export default {
   name: "HomePage",
+  data() {
+    return {
+      errorMessage: "",
+    };
+  },
   components: { BlogPostsList },
   computed: {
     ...mapGetters("auth", ["getLoggedInStatus", "getLoggedInUserData"]),
@@ -56,16 +58,36 @@ export default {
       "deleteBlogPost",
     ]),
     getBlogPostsOfUser: async function (userId) {
-      await this.getBlogPostsOfLoggedInUser(userId);
+      try {
+        await this.getBlogPostsOfLoggedInUser(userId);
+      } catch (error) {
+        console.log(error);
+        this.errorMessage = filterErrorMessages(error.response.status);
+      }
     },
     getAllBlogPosts: async function () {
-      await this.getEntireListOfBlogPosts();
+      try {
+        await this.getEntireListOfBlogPosts();
+      } catch (error) {
+        console.log(error);
+        this.errorMessage = filterErrorMessages(error.response.status);
+      }
     },
     handleDeleteBlogPost: async function (userId, blogPostId) {
-      await this.deleteBlogPost({ userId, blogPostId });
+      try {
+        await this.deleteBlogPost({ userId, blogPostId });
+      } catch (error) {
+        console.log(error);
+        this.errorMessage = filterErrorMessages(error.response.status);
+      }
     },
     handleEditBlogPost: function (blogPostsId) {
-      this.$router.push(`/blogPostPage/${blogPostsId}`);
+      try {
+        this.$router.push(`/blogPostPage/${blogPostsId}`);
+      } catch (error) {
+        console.log(error);
+        this.errorMessage = filterErrorMessages(error);
+      }
     },
   },
 };

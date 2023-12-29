@@ -72,18 +72,24 @@
           </button>
         </div>
       </div>
-    </div>
 
-    <div class="form-group update-status-msg-container">
-      <div v-if="message" class="alert alert-success" role="alert">
-        {{ message }}
+      <div v-if="errStatus === 'error'">
+        <alert-message :msg="message" alertType="alert-danger" />
       </div>
+
+      <div v-if="errStatus === 'success'">
+        <alert-message :msg="message" alertType="alert-success" />
+      </div>
+
+      <div v-else></div>
     </div>
   </article>
 </template>
 
 <script>
+import { filterErrorMessages } from "@/utils/utility";
 import { mapActions, mapGetters } from "vuex";
+import AlertMessage from "../components/AlertMessage";
 
 export default {
   name: "BlogPostPage",
@@ -92,9 +98,12 @@ export default {
       blogPostId: "",
       blogPost: {},
       message: "",
+      errorMessage: "",
       username: "",
+      errStatus: "",
     };
   },
+  components: { AlertMessage },
   computed: {
     ...mapGetters("auth", ["getLoggedInStatus", "getLoggedInUserData"]),
     ...mapGetters("blogPostsModule", [
@@ -134,14 +143,20 @@ export default {
         content: blogPost.content,
       };
 
-      await this.updateBlogPost({
-        userId: userId,
-        blogPostId: blogPostId,
-        blogPostToUpdate: updatedBlogPost,
-      });
+      try {
+        await this.updateBlogPost({
+          userId: userId,
+          blogPostId: blogPostId,
+          blogPostToUpdate: updatedBlogPost,
+        });
 
-      if (this.getBlogPostUpdateStatus === true) {
-        this.message = "Blog post updated successfully!";
+        if (this.getBlogPostUpdateStatus === true) {
+          this.message = "Blog post updated successfully!";
+          this.errStatus = "success";
+        }
+      } catch (error) {
+        this.message = filterErrorMessages(error.response.status);
+        this.errStatus = "error";
       }
     },
     goBackHome: function () {

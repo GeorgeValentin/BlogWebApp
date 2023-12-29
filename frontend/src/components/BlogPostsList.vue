@@ -7,6 +7,12 @@
     >
       <header>
         <h2 class="fw-bold fs-2 m-0">Community - What others are Posting</h2>
+
+        <div v-if="errorMsg !== ''">
+          <div class="position-absolute error-message-community">
+            <alert-message :msg="errorMsg" alertType="alert-danger" />
+          </div>
+        </div>
       </header>
     </div>
 
@@ -14,12 +20,18 @@
       <!-- Logged In User Title -->
       <div
         v-if="getLoggedInStatus === true"
-        class="d-flex justify-content-center align-items-center gap-3 mt-4 mb-3"
+        class="position-relative d-flex justify-content-center align-items-center gap-3 mt-4 mb-3"
       >
         <header>
           <h2 class="fw-bold fs-2 m-0">
             The Blog Posts of User "{{ getLoggedInUserData.username }}"
           </h2>
+
+          <div v-if="errorMsg !== ''">
+            <div class="position-absolute error-message-home">
+              <alert-message :msg="errorMsg" alertType="alert-danger" />
+            </div>
+          </div>
         </header>
       </div>
 
@@ -33,18 +45,23 @@
             All Blog Posts since you have last visited!!!
           </h2>
         </header>
-
-        <!-- Button to use to navigate to the "Add a Blog Post Page" -->
-        <!-- <div class="text-center">
-        <button
-          type="button"
-          class="btn btn-outline-dark fw-bold fs-5 border border-3 border-dark"
-          @click="navigateToAddAuthorPage()"
-        >
-          +
-        </button>
-      </div> -->
       </div>
+    </div>
+
+    <div
+      v-if="blogPosts.length === 0"
+      class="fw-bold fs-4 fst-italic w-25 missing-blog-posts-container"
+    >
+      <img
+        class="missing-blog-posts-img mb-3"
+        src="../assets/noPosts.png"
+        alt="missing-blog-posts"
+      />
+
+      <p>
+        There are not any Blog Posts added! Spread the word and grow your
+        community of people with common interests!
+      </p>
     </div>
 
     <div
@@ -164,12 +181,14 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import AlertMessage from "../components/AlertMessage";
 
 export default {
   name: "BlogPostsList",
-  props: ["blogPosts", "pageName"],
+  props: ["blogPosts", "pageName", "errorMsg"],
   components: {
     FontAwesomeIcon,
+    AlertMessage,
   },
   data() {
     return {
@@ -289,6 +308,24 @@ export default {
 
 .update-img {
   width: 2rem;
+}
+
+.missing-blog-posts-container {
+  margin: 7rem auto;
+}
+
+.missing-blog-posts-img {
+  width: 10rem;
+}
+
+.error-message-home {
+  right: 5%;
+  bottom: -33px;
+}
+
+.error-message-community {
+  right: 4%;
+  top: 7%;
 }
 
 @media (max-width: 850px) {

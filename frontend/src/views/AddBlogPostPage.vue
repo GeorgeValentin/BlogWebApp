@@ -16,6 +16,7 @@
             type="text"
             class="input-container border border-1 border-secondary rounded"
             v-model="blogPost.title"
+            placeholder="Your title"
           />
         </div>
 
@@ -28,6 +29,7 @@
             type="text"
             class="input-container border border-1 border-secondary rounded"
             v-model="blogPost.category"
+            placeholder="Pick a topic"
           />
         </div>
 
@@ -39,6 +41,7 @@
             type="text"
             class="input-container content-box border border-1 border-secondary rounded"
             v-model="blogPost.content"
+            placeholder="Start creating"
           ></textarea>
         </div>
 
@@ -63,11 +66,19 @@
         </div>
       </div>
     </div>
+
+    <div v-if="errorMessage !== ''">
+      <div class="error-message-add-post">
+        <alert-message :msg="errorMessage" alertType="alert-danger" />
+      </div>
+    </div>
   </article>
 </template>
 
 <script>
 import { mapGetters, mapActions } from "vuex";
+import { filterErrorMessages } from "../utils/utility";
+import AlertMessage from "../components/AlertMessage";
 
 export default {
   name: "AddBlogPostPage",
@@ -75,7 +86,11 @@ export default {
     return {
       blogPost: {},
       message: "",
+      errorMessage: "",
     };
+  },
+  components: {
+    AlertMessage,
   },
   computed: {
     ...mapGetters("auth", ["getLoggedInStatus", "getLoggedInUserData"]),
@@ -90,11 +105,18 @@ export default {
         content: blogPostData.content,
       };
 
-      await this.addBlogPost({ userId, blogPostToAdd });
+      try {
+        await this.addBlogPost({ userId, blogPostToAdd });
 
-      if (this.getBlogPostAddStatus === true) {
-        this.$router.push("/");
+        if (this.getBlogPostAddStatus === true) {
+          this.$router.push("/");
+        }
+      } catch (error) {
+        this.errorMessage = filterErrorMessages(error.response.status);
       }
+    },
+    goBackHome: function () {
+      this.$router.push("/");
     },
   },
 };
@@ -122,5 +144,9 @@ export default {
 }
 .input-container {
   width: 75%;
+}
+.error-message-add-post {
+  width: 31%;
+  margin: 2rem auto auto;
 }
 </style>

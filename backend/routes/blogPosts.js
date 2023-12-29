@@ -167,6 +167,18 @@ router
   .post(auth, checkUser, async (req, res) => {
     try {
       const blogPostToAdd = req.body;
+
+      if (
+        blogPostToAdd.title === undefined ||
+        blogPostToAdd.content === undefined ||
+        blogPostToAdd.category === undefined
+      ) {
+        return res.status(400).json({
+          message:
+            "Cannot add blog post! Please provide all the necessary information!",
+        });
+      }
+
       const userId = req.params.userId;
       const loggedInUser = req.user;
 
@@ -223,6 +235,23 @@ router
     }
 
     const blogPostToUpdate = req.body;
+
+    if (
+      blogPostToUpdate.title === undefined ||
+      blogPostToUpdate.title === null ||
+      blogPostToUpdate.title === "" ||
+      blogPostToUpdate.content === undefined ||
+      blogPostToUpdate.content === null ||
+      blogPostToUpdate.content === "" ||
+      blogPostToUpdate.category === undefined ||
+      blogPostToUpdate.category === null ||
+      blogPostToUpdate.category === ""
+    ) {
+      return res.status(400).json({
+        message:
+          "Cannot update blog post! Please provide all the necessary information!",
+      });
+    }
 
     req.blogPostDocData.title = blogPostToUpdate.title;
     req.blogPostDocData.content = blogPostToUpdate.content;

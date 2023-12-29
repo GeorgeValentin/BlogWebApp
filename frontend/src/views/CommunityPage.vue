@@ -1,14 +1,24 @@
 <template>
-  <blog-posts-list :blogPosts="getBlogPosts" pageName="community" />
+  <blog-posts-list
+    :blogPosts="getBlogPosts"
+    pageName="community"
+    :errorMsg="errorMessage"
+  />
 </template>
 
 <script>
 import BlogPostsList from "@/components/BlogPostsList";
 import { mapGetters, mapActions } from "vuex";
+import { filterErrorMessages } from "../utils/utility";
 
 export default {
   name: "CommunityPage",
   components: { BlogPostsList },
+  data() {
+    return {
+      errorMessage: "",
+    };
+  },
   computed: {
     ...mapGetters("auth", ["getLoggedInStatus", "getLoggedInUserData"]),
     ...mapGetters("blogPostsModule", ["getBlogPosts"]),
@@ -29,7 +39,11 @@ export default {
   methods: {
     ...mapActions("blogPostsModule", ["getBlogPostsOfCommunity"]),
     getBlogPostsOfOthers: async function (userId) {
-      await this.getBlogPostsOfCommunity(userId);
+      try {
+        await this.getBlogPostsOfCommunity(userId);
+      } catch (error) {
+        this.errorMessage = filterErrorMessages(error.response.status);
+      }
     },
   },
 };
