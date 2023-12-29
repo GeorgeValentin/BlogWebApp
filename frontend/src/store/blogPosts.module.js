@@ -4,6 +4,7 @@ const initialState = {
   blogPostsList: [],
   blogPost: {},
   getBlogPostStatus: false,
+  addedBlogPostStatus: false,
   updatedBlogPostStatus: false,
   deleteBlogPostStatus: false,
 };
@@ -62,6 +63,24 @@ export const blogPostsModule = {
         }
       );
     },
+    addBlogPost({ commit }, { userId, blogPostToAdd }) {
+      return BlogPostsService.addBlogPost(userId, blogPostToAdd).then(
+        async (response) => {
+          const updatedBlogPosts =
+            await BlogPostsService.getBlogPostsOfLoggedInUser(
+              userId,
+              response.data.blogPostId
+            );
+
+          commit("addedBlogPostSuccess", updatedBlogPosts.data);
+          return Promise.resolve(response);
+        },
+        (error) => {
+          commit("addedBlogPostFailure");
+          return Promise.reject(error);
+        }
+      );
+    },
     updateBlogPost({ commit }, { userId, blogPostId, blogPostToUpdate }) {
       return BlogPostsService.editBlogPost(
         userId,
@@ -69,7 +88,6 @@ export const blogPostsModule = {
         blogPostToUpdate
       ).then(
         (response) => {
-          console.log(response);
           commit("updatedBlogPostSuccess", response);
           return Promise.resolve(response);
         },
@@ -113,6 +131,13 @@ export const blogPostsModule = {
     getBlogPostByIdFailure(state) {
       state.getBlogPostStatus = false;
     },
+    addedBlogPostSuccess(state, updatedBlogPosts) {
+      state.blogPostsList = updatedBlogPosts;
+      state.addedBlogPostStatus = true;
+    },
+    addedBlogPostFailure(state) {
+      state.addedBlogPostStatus = false;
+    },
     updatedBlogPostSuccess(state) {
       state.updatedBlogPostStatus = true;
     },
@@ -136,6 +161,9 @@ export const blogPostsModule = {
     },
     getBlogPostUpdateStatus: (state) => {
       return state.updatedBlogPostStatus;
+    },
+    getBlogPostAddStatus: (state) => {
+      return state.addedBlogPostStatus;
     },
   },
 };

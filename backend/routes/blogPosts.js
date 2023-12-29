@@ -181,6 +181,7 @@ router
 
       blogPostToAdd.authorId = userId;
       blogPostToAdd.comments = [];
+      blogPostToAdd.lastModifiedAt = new Date().toLocaleDateString();
 
       const addedBlogPost = await blogPostsCollection.add(blogPostToAdd);
       blogPostToAdd.blogPostId = addedBlogPost.id;
@@ -196,12 +197,6 @@ router
       return res.status(500).json(err);
     }
   });
-
-// // -> get Blog Post by its ID
-// router.route("/blogPosts/:blogPostId").get(checkBlogPost, async (req, res) => {
-//   console.log(req.params.blogPostId);
-//   return res.status(200).json(req.blogPostDocData);
-// });
 
 router
   .route("/users/:userId/blogPosts/:blogPostId")

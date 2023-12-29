@@ -5,7 +5,7 @@ const generateBlogPost = () => {
   return {
     title: chanceInstance.word({ length: 7 }),
     content: chanceInstance.paragraph({ sentences: 3 }),
-    creationDate: chanceInstance.birthday({
+    lastModifiedAt: chanceInstance.birthday({
       string: true,
       year: chanceInstance.year({ min: 2010, max: 2023 }),
     }),

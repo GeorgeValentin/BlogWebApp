@@ -26,6 +26,14 @@ class BlogPostsService {
     );
   }
 
+  async addBlogPost(loggedInUserId, blogPostToAdd) {
+    return await axios.post(
+      `${API_URL}/users/${String(loggedInUserId)}/blogPosts`,
+      blogPostToAdd,
+      { headers: authHeader() }
+    );
+  }
+
   async editBlogPost(loggedInUserId, blogPostId, blogPostToUpdate) {
     return await axios.put(
       `${API_URL}/users/${String(loggedInUserId)}/blogPosts/${blogPostId}`,
