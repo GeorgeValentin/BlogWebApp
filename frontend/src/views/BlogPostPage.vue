@@ -76,7 +76,9 @@
 
         <div v-if="blogPostOfLoggedInUserStatus === false">
           <comments-list
+            :eventEmitStatus="eventEmitStatusOn"
             :commentsList="getComments"
+            :noCommentsMessage="emptyCommentMsg"
             @addComment="addComment"
             @deleteComment="deleteComment"
             @editComment="editComment"
@@ -104,6 +106,12 @@
           >
             Go Back
           </button>
+
+          <comments-list
+            :eventEmitStatus="false"
+            :commentsList="getCommentsOfOtherUsers"
+            :noCommentsMessage="emptyCommentMsg"
+          />
         </div>
       </div>
 
@@ -141,6 +149,8 @@ export default {
       alertStatus: "",
       loadingStatus: true,
       blogPostOfLoggedInUserStatus: false,
+      eventEmitStatusOn: true,
+      emptyCommentMsg: "",
     };
   },
   components: { AlertMessage, CommentsList },
@@ -155,6 +165,7 @@ export default {
       "getAddCommentStatus",
       "getDeletedCommentStatus",
       "getUpdatedCommentStatus",
+      "getCommentsOfOtherUsers",
     ]),
   },
   created() {
@@ -166,9 +177,15 @@ export default {
       if (this.authorId === this.getLoggedInUserData.userId) {
         this.blogPostOfLoggedInUserStatus = true;
         this.authorId = this.getLoggedInUserData.userId;
-      }
 
-      this.getEntireListOfComments(this.blogPostId);
+        this.getCommentsOfOthers(this.blogPostId);
+        this.emptyCommentMsg =
+          "There have not been any comments added yet! Spread the word about your great ideas and topics!";
+      } else {
+        this.getEntireListOfComments(this.blogPostId);
+        this.emptyCommentMsg =
+          "There have not been any comments added yet! Start expressing your thoughts now!";
+      }
 
       this.getBlogPostByItsId(this.authorId, this.blogPostId);
     } else {
@@ -178,7 +195,7 @@ export default {
   methods: {
     ...mapActions("blogPostsModule", ["getBlogPostById", "updateBlogPost"]),
     ...mapActions("commentsModule", [
-      "getCommentsOfBlogPost",
+      "getCommentsOfBlogPostFromOthers",
       "addCommentToBlogPost",
       "getCommentsFromAllUsersOfBlogPost",
       "deleteCommentOfBlogPost",
@@ -244,6 +261,20 @@ export default {
     getEntireListOfComments: async function (blogPostId) {
       try {
         await this.getCommentsFromAllUsersOfBlogPost({
+          blogPostId,
+        });
+      } catch (error) {
+        if (error.response.status === 401 || error.response.status === 403) {
+          this.handleLogout();
+        }
+        this.message = filterErrorMessages(error.response.status);
+        this.alertStatus = "error";
+        this.setAutoHideAlert();
+      }
+    },
+    getCommentsOfOthers: async function (blogPostId) {
+      try {
+        await this.getCommentsOfBlogPostFromOthers({
           blogPostId,
         });
       } catch (error) {
@@ -390,6 +421,7 @@ export default {
 }
 .content-container {
   max-height: 8rem;
+  min-height: 8rem;
   overflow: auto;
 }
 </style>

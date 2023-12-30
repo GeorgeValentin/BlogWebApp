@@ -11,10 +11,9 @@
           class="no-comments-img"
           src="../assets/noComments.png"
           alt="no-comments-img"
-        /><span class="w-50 my-0 m-auto fst-italic fs-6 fw-bold"
-          >There have not been any comments added! Start expressing your
-          thoughts now!</span
-        >
+        /><span class="w-50 my-0 m-auto fst-italic fs-6 fw-bold">{{
+          noCommentsMessage
+        }}</span>
       </div>
       <div
         v-else
@@ -57,6 +56,7 @@
                       comment.commentId
                     )
                   "
+                  v-if="eventEmitStatus === true"
                 >
                   <font-awesome-icon icon="fa-trash" />
                 </button>
@@ -81,7 +81,7 @@
       </div>
     </div>
 
-    <div class="add-comment-container mt-2">
+    <div v-if="eventEmitStatus === true" class="add-comment-container mt-2">
       <div
         class="add-comment-element d-flex justify-content-center align-items-center gap-2 flex-column"
       >
@@ -139,7 +139,7 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 export default {
   name: "CommentsList",
-  props: ["commentsList"],
+  props: ["commentsList", "eventEmitStatus", "noCommentsMessage"],
   components: { FontAwesomeIcon },
   data() {
     return {
@@ -149,6 +149,7 @@ export default {
       userId: "",
       commentId: "",
       editStatus: false,
+      eventsStatus: false,
     };
   },
   created() {
@@ -169,7 +170,9 @@ export default {
         commentData: this.commentData,
       };
 
-      this.$emit("addComment", payload);
+      if (this.eventEmitStatus === true) {
+        this.$emit("addComment", payload);
+      }
 
       this.commentData = "";
     },
@@ -181,7 +184,9 @@ export default {
         commentData: this.commentData,
       };
 
-      this.$emit("editComment", payload);
+      if (this.eventEmitStatus === true) {
+        this.$emit("editComment", payload);
+      }
 
       this.commentData = "";
       this.editStatus = false;

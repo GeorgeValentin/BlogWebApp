@@ -4,9 +4,9 @@ import authHeader from "./auth.header";
 const API_URL = "api";
 
 class CommentsService {
-  async getAllComments(userId, blogPostId) {
+  async getAllCommentsWithoutLoggedInData(blogPostId) {
     return await axios.get(
-      `${API_URL}/users/${String(userId)}/blogPosts/${blogPostId}/comments`,
+      `${API_URL}/blogPostsWithoutLoggedIn/${blogPostId}/comments`,
       { headers: authHeader() }
     );
   }

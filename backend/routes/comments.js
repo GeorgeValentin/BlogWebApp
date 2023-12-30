@@ -7,6 +7,7 @@ const checkComment = require("../middleware/checkComment");
 const auth = require("../middleware/auth");
 
 router
+  // -> get all comments added to a blog post (including the logged in user's)
   .route("/blogPosts/:blogPostId/comments")
   .get(checkBlogPost, async (req, res) => {
     const { blogPostId } = req.params;
@@ -39,37 +40,51 @@ router
   });
 
 router
-  // -> get all comments of blog post of logged in user
-  .route("/users/:userId/blogPosts/:blogPostId/comments")
-  .get(auth, checkUser, checkBlogPost, async (req, res) => {
-    const { userId, blogPostId } = req.params;
-    const loggedInUser = req.user;
+  // -> get all comments added to a blog post (excluding the logged in user's)
+  .route("/blogPostsWithoutLoggedIn/:blogPostId/comments")
+  .get(auth, checkBlogPost, async (req, res) => {
+    const { blogPostId } = req.params;
+    const loggedInUserId = req.user.userId;
 
     const commentsCollection = db
       .collection("comments")
-      .where("authorId", "==", userId)
       .where("blogPostId", "==", blogPostId);
+    const usersCollection = db.collection("users");
 
-    const commentDocs = await commentsCollection.get();
+    const commentsDocs = await commentsCollection.get();
     let response = [];
 
-    commentDocs.forEach((commentDoc) => {
+    const commentsArray = commentsDocs.docs.map(async (commentDoc) => {
       const commentDocData = commentDoc.data();
 
-      const { ...commentCopy } = commentDocData;
+      if (commentDocData.authorId !== loggedInUserId) {
+        const userDocRef = usersCollection.doc(commentDocData.authorId);
+        const userDoc = await userDocRef.get();
+        const userDocData = userDoc.data();
 
-      const commentWithAuthorName = {
-        ...commentCopy,
-        authorName: loggedInUser.username,
-      };
+        const { ...commentCopy } = commentDocData;
 
-      response.push(commentWithAuthorName);
+        const commentWithAuthorName = {
+          ...commentCopy,
+          authorName: userDocData.username,
+        };
+
+        return commentWithAuthorName;
+      }
     });
+    response = await Promise.all(commentsArray);
 
-    return res.status(200).json(response);
-  })
-  // -> add a comment to a blog post that is (TBD - not of the post of the logged in user)
-  // -> the logged in user should add comments to other people's posts
+    // Filter out null & undefined values
+    const filteredResponse = response.filter(
+      (elem) => elem !== null && elem !== undefined
+    );
+
+    return res.status(200).json(filteredResponse);
+  });
+
+router
+  .route("/users/:userId/blogPosts/:blogPostId/comments")
+  // -> add a comment to a blog post of some other user (not to the same that is logged in)
   .post(auth, checkUser, checkBlogPost, async (req, res) => {
     if (
       req.body.content === undefined ||

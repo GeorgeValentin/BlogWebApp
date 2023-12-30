@@ -2,6 +2,7 @@ import CommentsService from "@/services/comments.service";
 
 const initialState = {
   commentsList: [],
+  commentsListOfOthers: [],
   comment: {},
   commentAuthor: "",
   getCommentsStatus: false,
@@ -14,20 +15,20 @@ export const commentsModule = {
   namespaced: true,
   state: initialState,
   actions: {
-    // -> used for when the logged in user wants to modify the comments (edit/delete)
-    getCommentsOfBlogPost({ commit }, { userId, blogPostId }) {
-      return CommentsService.getAllComments(userId, blogPostId).then(
+    // -> used when the logged in user wants to see what other people are commenting on posts (read-only)
+    getCommentsOfBlogPostFromOthers({ commit }, { blogPostId }) {
+      return CommentsService.getAllCommentsWithoutLoggedInData(blogPostId).then(
         (response) => {
-          commit("getCommentsSuccess", response);
+          commit("getCommentsOfOthersSuccess", response);
           return Promise.resolve(response);
         },
         (error) => {
-          commit("getCommentsFailure");
+          commit("getCommentsOfOthersFailure");
           return Promise.reject(error);
         }
       );
     },
-    // -> used when the logged in user wants to see what other people are commenting on posts (read-only)
+    // -> used for when the logged in user wants to modify the comments (edit/delete)
     getCommentsFromAllUsersOfBlogPost({ commit }, { blogPostId }) {
       return CommentsService.getAllCommentsOfAllUsersFromAPost(blogPostId).then(
         (response) => {
@@ -99,6 +100,13 @@ export const commentsModule = {
     getCommentsFailure(state) {
       state.getCommentsStatus = false;
     },
+    getCommentsOfOthersSuccess(state, comments) {
+      state.commentsListOfOthers = comments.data;
+      state.getCommentsStatus = true;
+    },
+    getCommentsOfOthersFailure(state) {
+      state.getCommentsStatus = false;
+    },
     addCommentSuccess(state, updatedComments) {
       state.commentsList = updatedComments;
       state.commentAddedStatus = true;
@@ -123,6 +131,9 @@ export const commentsModule = {
   getters: {
     getComments: (state) => {
       return state.commentsList;
+    },
+    getCommentsOfOtherUsers: (state) => {
+      return state.commentsListOfOthers;
     },
     getComment: (state) => {
       return state.comment;
