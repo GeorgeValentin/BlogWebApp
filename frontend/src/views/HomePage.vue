@@ -67,7 +67,7 @@ export default {
       } catch (error) {
         this.loadingStatus = true;
 
-        console.log(error);
+        console.log(error.response);
         this.errorMessage = filterErrorMessages(error.response.status);
       } finally {
         this.loadingStatus = false;

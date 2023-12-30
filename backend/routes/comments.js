@@ -7,6 +7,38 @@ const checkComment = require("../middleware/checkComment");
 const auth = require("../middleware/auth");
 
 router
+  .route("/blogPosts/:blogPostId/comments")
+  .get(checkBlogPost, async (req, res) => {
+    const { blogPostId } = req.params;
+    let response = [];
+    const commentsCollection = db
+      .collection("comments")
+      .where("blogPostId", "==", blogPostId);
+    const usersCollection = db.collection("users");
+
+    const commentsDocs = await commentsCollection.get();
+
+    const commentsArray = commentsDocs.docs.map(async (commentDoc) => {
+      const commentDocData = commentDoc.data();
+
+      const userDocRef = usersCollection.doc(commentDocData.authorId);
+      const userDoc = await userDocRef.get();
+      const userDocData = userDoc.data();
+      const { ...commentCopy } = commentDocData;
+
+      const commentWithAuthorName = {
+        ...commentCopy,
+        authorName: userDocData.username,
+      };
+
+      return commentWithAuthorName;
+    });
+    response = await Promise.all(commentsArray);
+
+    return res.status(200).json(response);
+  });
+
+router
   // -> get all comments of blog post of logged in user
   .route("/users/:userId/blogPosts/:blogPostId/comments")
   .get(auth, checkUser, checkBlogPost, async (req, res) => {

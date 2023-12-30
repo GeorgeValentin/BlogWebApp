@@ -66,14 +66,20 @@
           <div
             v-else
             id="text-area-highlight-text"
-            class="text-field-highlight"
+            class="text-field-highlight content-container"
           >
-            {{ getBlogPost.content }}
+            <div>
+              {{ getBlogPost.content }}
+            </div>
           </div>
         </div>
 
         <div v-if="blogPostOfLoggedInUserStatus === false">
-          <comments-list :commentsList="getComments" @addComment="addComment" />
+          <comments-list
+            :commentsList="getComments"
+            @addComment="addComment"
+            @deleteComment="deleteComment"
+          />
         </div>
 
         <div
@@ -100,11 +106,11 @@
         </div>
       </div>
 
-      <div v-if="errStatus === 'error'" class="mt-4">
+      <div v-if="errStatus === 'error'" class="alert-container mt-4">
         <alert-message :msg="message" alertType="alert-danger" />
       </div>
 
-      <div v-if="errStatus === 'success'" class="mt-4">
+      <div v-if="errStatus === 'success'" class="alert-container mt-4">
         <alert-message :msg="message" alertType="alert-success" />
       </div>
     </div>
@@ -139,31 +145,37 @@ export default {
       "getBlogPost",
       "getBlogPostUpdateStatus",
     ]),
-    ...mapGetters("commentsModule", ["getComments", "getAddCommentStatus"]),
+    ...mapGetters("commentsModule", [
+      "getComments",
+      "getAddCommentStatus",
+      "getDeletedCommentStatus",
+    ]),
   },
   created() {
     this.blogPostId = this.$route.params.blogPostId;
     this.authorId = this.$route.params.authorId;
 
     if (this.getLoggedInStatus === true && this.getLoggedInUserData !== null) {
+      // -> this means I am navigating to the logged in user posts(HOME) - Otherwise it's the COMMUNITY
       if (this.authorId === this.getLoggedInUserData.userId) {
         this.blogPostOfLoggedInUserStatus = true;
         this.authorId = this.getLoggedInUserData.userId;
       }
 
-      this.getEntireListOfComments(
-        this.getLoggedInUserData.userId,
-        this.blogPostId
-      );
-    }
+      this.getEntireListOfComments(this.blogPostId);
 
-    this.getBlogPostByItsId(this.authorId, this.blogPostId);
+      this.getBlogPostByItsId(this.authorId, this.blogPostId);
+    } else {
+      this.handleLogout();
+    }
   },
   methods: {
     ...mapActions("blogPostsModule", ["getBlogPostById", "updateBlogPost"]),
     ...mapActions("commentsModule", [
       "getCommentsOfBlogPost",
       "addCommentToBlogPost",
+      "getCommentsFromAllUsersOfBlogPost",
+      "deleteCommentOfBlogPost",
     ]),
     ...mapActions("auth", ["logout"]),
     handleLogout: function () {
@@ -216,13 +228,13 @@ export default {
         this.errStatus = "error";
       }
     },
-    getEntireListOfComments: async function (userId, blogPostId) {
+    getEntireListOfComments: async function (blogPostId) {
       try {
-        await this.getCommentsOfBlogPost({
-          userId,
+        await this.getCommentsFromAllUsersOfBlogPost({
           blogPostId,
         });
       } catch (error) {
+        console.log(error);
         this.message = filterErrorMessages(error.response.status);
         this.errStatus = "error";
       }
@@ -245,15 +257,32 @@ export default {
         if (this.getAddCommentStatus === true) {
           this.message = "Comment added successfully!";
           this.errStatus = "success";
+          this.setAutoHideAlert();
         }
       } catch (error) {
         console.log(error);
         this.message = filterErrorMessages(error.response.status);
         this.errStatus = "error";
+        this.setAutoHideAlert();
       }
+    },
+    deleteComment: async function (userId, blogPostId, commentId) {
+      console.log(userId);
+      console.log(blogPostId);
+      console.log(commentId);
+
+      await this.deleteCommentOfBlogPost({ userId, blogPostId, commentId });
+
+      // console.log(this.getDeletedCommentStatus);
     },
     goBackHome: function () {
       this.$router.push("/");
+    },
+    setAutoHideAlert: function () {
+      setTimeout(() => {
+        this.message = "";
+        this.errStatus = "";
+      }, 3500);
     },
   },
 };
@@ -262,7 +291,7 @@ export default {
 <style scoped>
 .card {
   width: 35rem;
-  height: 78%;
+  height: 79%;
   margin: auto;
   background-color: #f6e58d;
 }
@@ -292,9 +321,17 @@ export default {
   width: 75%;
   border-radius: 0.25rem;
 }
-
 #text-area-highlight-text {
   padding: 0.1rem;
   text-align: justify;
+}
+.alert-container {
+  position: absolute;
+  top: 54rem;
+  width: 100%;
+}
+.content-container {
+  max-height: 8rem;
+  overflow: auto;
 }
 </style>

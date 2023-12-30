@@ -11,10 +11,23 @@ class CommentsService {
     );
   }
 
+  async getAllCommentsOfAllUsersFromAPost(blogPostId) {
+    return await axios.get(`${API_URL}/blogPosts/${blogPostId}/comments`);
+  }
+
   async addComment(userId, blogPostId, commentToAdd) {
     return await axios.post(
       `${API_URL}/users/${String(userId)}/blogPosts/${blogPostId}/comments`,
       commentToAdd,
+      { headers: authHeader() }
+    );
+  }
+
+  async deleteComment(userId, blogPostId, commentId) {
+    return await axios.delete(
+      `${API_URL}/users/${String(
+        userId
+      )}/blogPosts/${blogPostId}/comments/${commentId}`,
       { headers: authHeader() }
     );
   }
