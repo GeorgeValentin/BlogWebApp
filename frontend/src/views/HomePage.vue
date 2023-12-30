@@ -60,14 +60,19 @@ export default {
       "getEntireListOfBlogPosts",
       "deleteBlogPost",
     ]),
+    handleLogout: function () {
+      this.logout();
+      this.$router.push("/login");
+    },
     getBlogPostsOfUser: async function (userId) {
       try {
         await this.getBlogPostsOfLoggedInUser(userId);
         this.loadingStatus = false;
       } catch (error) {
+        if (error.response.status === 401 || error.response.status === 403) {
+          this.handleLogout();
+        }
         this.loadingStatus = true;
-
-        console.log(error.response);
         this.errorMessage = filterErrorMessages(error.response.status);
       } finally {
         this.loadingStatus = false;
@@ -78,8 +83,10 @@ export default {
         await this.getEntireListOfBlogPosts();
         this.loadingStatus = false;
       } catch (error) {
+        if (error.response.status === 401 || error.response.status === 403) {
+          this.handleLogout();
+        }
         this.loadingStatus = true;
-        console.log(error);
         this.errorMessage = filterErrorMessages(error.response.status);
       } finally {
         this.loadingStatus = false;
@@ -89,7 +96,9 @@ export default {
       try {
         await this.deleteBlogPost({ userId, blogPostId });
       } catch (error) {
-        console.log(error);
+        if (error.response.status === 401 || error.response.status === 403) {
+          this.handleLogout();
+        }
         this.errorMessage = filterErrorMessages(error.response.status);
       }
     },

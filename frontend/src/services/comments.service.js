@@ -23,6 +23,16 @@ class CommentsService {
     );
   }
 
+  async editComment(userId, blogPostId, commentId, commentToUpdate) {
+    return await axios.put(
+      `${API_URL}/users/${String(
+        userId
+      )}/blogPosts/${blogPostId}/comments/${commentId}`,
+      commentToUpdate,
+      { headers: authHeader() }
+    );
+  }
+
   async deleteComment(userId, blogPostId, commentId) {
     return await axios.delete(
       `${API_URL}/users/${String(

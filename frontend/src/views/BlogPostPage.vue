@@ -79,6 +79,7 @@
             :commentsList="getComments"
             @addComment="addComment"
             @deleteComment="deleteComment"
+            @editComment="editComment"
           />
         </div>
 
@@ -106,12 +107,16 @@
         </div>
       </div>
 
-      <div v-if="errStatus === 'error'" class="alert-container mt-4">
+      <div v-if="alertStatus === 'error'" class="alert-container mt-4">
         <alert-message :msg="message" alertType="alert-danger" />
       </div>
 
-      <div v-if="errStatus === 'success'" class="alert-container mt-4">
+      <div v-if="alertStatus === 'success'" class="alert-container mt-4">
         <alert-message :msg="message" alertType="alert-success" />
+      </div>
+
+      <div v-if="alertStatus === 'delete'" class="alert-container mt-4">
+        <alert-message :msg="message" alertType="alert-dark" />
       </div>
     </div>
   </article>
@@ -133,7 +138,7 @@ export default {
       message: "",
       errorMessage: "",
       username: "",
-      errStatus: "",
+      alertStatus: "",
       loadingStatus: true,
       blogPostOfLoggedInUserStatus: false,
     };
@@ -149,6 +154,7 @@ export default {
       "getComments",
       "getAddCommentStatus",
       "getDeletedCommentStatus",
+      "getUpdatedCommentStatus",
     ]),
   },
   created() {
@@ -176,6 +182,7 @@ export default {
       "addCommentToBlogPost",
       "getCommentsFromAllUsersOfBlogPost",
       "deleteCommentOfBlogPost",
+      "updateCommentOfBlogPost",
     ]),
     ...mapActions("auth", ["logout"]),
     handleLogout: function () {
@@ -199,8 +206,9 @@ export default {
           this.handleLogout();
         }
         this.message = filterErrorMessages(error.response.status);
-        this.errStatus = "error";
+        this.alertStatus = "error";
         this.loadingStatus = true;
+        this.setAutoHideAlert();
       } finally {
         this.loadingStatus = false;
       }
@@ -221,11 +229,16 @@ export default {
 
         if (this.getBlogPostUpdateStatus === true) {
           this.message = "Blog post updated successfully!";
-          this.errStatus = "success";
+          this.alertStatus = "success";
+          this.setAutoHideAlert();
         }
       } catch (error) {
+        if (error.response.status === 401 || error.response.status === 403) {
+          this.handleLogout();
+        }
         this.message = filterErrorMessages(error.response.status);
-        this.errStatus = "error";
+        this.alertStatus = "error";
+        this.setAutoHideAlert();
       }
     },
     getEntireListOfComments: async function (blogPostId) {
@@ -234,9 +247,12 @@ export default {
           blogPostId,
         });
       } catch (error) {
-        console.log(error);
+        if (error.response.status === 401 || error.response.status === 403) {
+          this.handleLogout();
+        }
         this.message = filterErrorMessages(error.response.status);
-        this.errStatus = "error";
+        this.alertStatus = "error";
+        this.setAutoHideAlert();
       }
     },
     addComment: async function (payload) {
@@ -256,33 +272,75 @@ export default {
 
         if (this.getAddCommentStatus === true) {
           this.message = "Comment added successfully!";
-          this.errStatus = "success";
+          this.alertStatus = "success";
           this.setAutoHideAlert();
         }
       } catch (error) {
-        console.log(error);
+        if (error.response.status === 401 || error.response.status === 403) {
+          this.handleLogout();
+        }
         this.message = filterErrorMessages(error.response.status);
-        this.errStatus = "error";
+        this.alertStatus = "error";
+        this.setAutoHideAlert();
+      }
+    },
+    editComment: async function (payload) {
+      const { userId, blogPostId, commentId, commentData } = payload;
+
+      const commentToUpdate = {
+        content: commentData,
+      };
+
+      try {
+        await this.updateCommentOfBlogPost({
+          userId,
+          blogPostId,
+          commentId,
+          commentToUpdate,
+        });
+
+        if (this.getUpdatedCommentStatus === true) {
+          this.getEntireListOfComments(this.blogPostId);
+
+          this.message = "Comment updated successfully!";
+          this.alertStatus = "success";
+          this.setAutoHideAlert();
+        }
+      } catch (error) {
+        if (error.response.status === 401 || error.response.status === 403) {
+          this.handleLogout();
+        }
+        this.message = filterErrorMessages(error.response.status);
+        this.alertStatus = "error";
         this.setAutoHideAlert();
       }
     },
     deleteComment: async function (userId, blogPostId, commentId) {
-      console.log(userId);
-      console.log(blogPostId);
-      console.log(commentId);
+      try {
+        await this.deleteCommentOfBlogPost({ userId, blogPostId, commentId });
 
-      await this.deleteCommentOfBlogPost({ userId, blogPostId, commentId });
-
-      // console.log(this.getDeletedCommentStatus);
-    },
-    goBackHome: function () {
-      this.$router.push("/");
+        if (this.getDeletedCommentStatus === true) {
+          this.message = "Comment deleted successfully!";
+          this.alertStatus = "delete";
+          this.setAutoHideAlert();
+        }
+      } catch (error) {
+        if (error.response.status === 401 || error.response.status === 403) {
+          this.handleLogout();
+        }
+        this.message = filterErrorMessages(error.response.status);
+        this.alertStatus = "error";
+        this.setAutoHideAlert();
+      }
     },
     setAutoHideAlert: function () {
       setTimeout(() => {
         this.message = "";
-        this.errStatus = "";
+        this.alertStatus = "";
       }, 3500);
+    },
+    goBackHome: function () {
+      this.$router.push("/");
     },
   },
 };

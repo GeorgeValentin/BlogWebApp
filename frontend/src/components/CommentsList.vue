@@ -25,8 +25,8 @@
         <section
           class="comment-entry fs-6 mb-2 w-100 m-auto d-flex justify-content-center gap-2 align-items-center"
         >
-          <div class="comment-container border border-2 border-dark w-75">
-            <div class="text-center fw-bold fst-italic fs-5">
+          <div class="comment-container border border-2 border-dark pt-4">
+            <div class="text-center fw-bold fst-italic fs-5 mb-2">
               "{{ comment.content }}"
             </div>
             <div
@@ -48,14 +48,27 @@
             </div>
 
             <!-- allow the deletion only for the comments of the logged in user -->
-            <div v-if="comment.authorId === getLoggedInUserData.userId">
+            <div
+              v-if="
+                getLoggedInUserData.userId !== null &&
+                comment.authorId === getLoggedInUserData.userId
+              "
+              class="comm-action-btns-container d-flex justify-content-center align-items-center"
+            >
               <button
-                class="delete-comm-btn d-flex justify-content-center align-items-center gap-2 btn btn-danger border border-2 border-danger"
+                class="d-flex justify-content-center align-items-center gap-2 btn btn-danger border border-2 border-danger"
                 @click="
                   $emit('deleteComment', userId, blogPostId, comment.commentId)
                 "
               >
                 <font-awesome-icon icon="fa-trash" />
+              </button>
+
+              <button
+                class="d-flex justify-content-center align-items-center gap-2 btn btn-warning border border-2 border-warning border-dark"
+                @click="handleEditComment(comment.commentId)"
+              >
+                <font-awesome-icon icon="fa-pen-to-square" />
               </button>
             </div>
           </div>
@@ -76,11 +89,12 @@
             :maxlength="commentCharacterLimit"
             v-model="commentData"
           ></textarea>
-          <label for="floatingTextarea2">Comments</label>
+          <label for="floatingTextarea2">Leave a Comment...</label>
         </div>
 
         <div
-          class="add-comm-action-container d-flex justify-content-between align-items-center"
+          class="comm-action-container d-flex justify-content-between align-items-center"
+          v-if="editStatus === false"
         >
           <div>{{ remainingCharacters }} characters left</div>
 
@@ -91,6 +105,22 @@
           >
             <font-awesome-icon icon="fa-plus" />
             <span class="fw-bold">Add</span>
+          </button>
+        </div>
+
+        <div
+          class="comm-action-container d-flex justify-content-between align-items-center"
+          v-else
+        >
+          <div>{{ remainingCharacters }} characters left</div>
+
+          <button
+            v-if="getLoggedInStatus === true && getLoggedInUserData !== null"
+            class="d-flex justify-content-center align-items-center flex-row gap-2 btn btn-warning border border-2 border-dark text-dark"
+            @click="editComment"
+          >
+            <font-awesome-icon icon="fa-pen-to-square" />
+            <span class="fw-bold">Edit</span>
           </button>
         </div>
       </div>
@@ -112,6 +142,8 @@ export default {
       commentCharacterLimit: 105,
       blogPostId: "",
       userId: "",
+      commentId: "",
+      editStatus: false,
     };
   },
   created() {
@@ -125,7 +157,7 @@ export default {
     },
   },
   methods: {
-    addComment: async function () {
+    addComment: function () {
       const payload = {
         userId: this.userId,
         blogPostId: this.blogPostId,
@@ -135,6 +167,23 @@ export default {
       this.$emit("addComment", payload);
 
       this.commentData = "";
+    },
+    editComment: function () {
+      const payload = {
+        userId: this.userId,
+        blogPostId: this.blogPostId,
+        commentId: this.commentId,
+        commentData: this.commentData,
+      };
+
+      this.$emit("editComment", payload);
+
+      this.commentData = "";
+      this.editStatus = false;
+    },
+    handleEditComment: function (commentId) {
+      this.editStatus = true;
+      this.commentId = commentId;
     },
   },
 };
@@ -165,7 +214,7 @@ export default {
 .form-floating {
   width: 90%;
 }
-.add-comm-action-container {
+.comm-action-container {
   width: 88%;
 }
 .no-comments-section {
@@ -176,10 +225,12 @@ export default {
 }
 .comment-container {
   position: relative;
+  width: 95%;
 }
-.delete-comm-btn {
+.comm-action-btns-container {
+  gap: 0.5rem;
   position: absolute;
-  bottom: 0.3rem;
-  right: 0.3rem;
+  top: 4.8rem;
+  right: 0.5rem;
 }
 </style>

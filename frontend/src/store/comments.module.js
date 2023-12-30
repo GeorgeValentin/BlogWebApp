@@ -6,6 +6,7 @@ const initialState = {
   commentAuthor: "",
   getCommentsStatus: false,
   commentAddedStatus: false,
+  updatedCommentstatus: false,
   deleteCommentStatus: false,
 };
 
@@ -28,10 +29,8 @@ export const commentsModule = {
     },
     // -> used when the logged in user wants to see what other people are commenting on posts (read-only)
     getCommentsFromAllUsersOfBlogPost({ commit }, { blogPostId }) {
-      console.log(blogPostId);
       return CommentsService.getAllCommentsOfAllUsersFromAPost(blogPostId).then(
         (response) => {
-          console.log(response);
           commit("getCommentsSuccess", response);
           return Promise.resolve(response);
         },
@@ -52,6 +51,26 @@ export const commentsModule = {
         },
         (error) => {
           commit("addCommentFailure");
+          return Promise.reject(error);
+        }
+      );
+    },
+    updateCommentOfBlogPost(
+      { commit },
+      { userId, blogPostId, commentId, commentToUpdate }
+    ) {
+      return CommentsService.editComment(
+        userId,
+        blogPostId,
+        commentId,
+        commentToUpdate
+      ).then(
+        (response) => {
+          commit("updatedCommentSuccess", response);
+          return Promise.resolve(response);
+        },
+        (error) => {
+          commit("updatedCommentFailure");
           return Promise.reject(error);
         }
       );
@@ -87,6 +106,12 @@ export const commentsModule = {
     addCommentFailure(state) {
       state.commentAddedStatus = false;
     },
+    updatedCommentSuccess(state) {
+      state.updatedCommentstatus = true;
+    },
+    updatedCommentFailure(state) {
+      state.updatedCommentstatus = false;
+    },
     deletedCommentSuccess(state, updatedComments) {
       state.commentsList = updatedComments;
       state.deleteCommentStatus = true;
@@ -104,6 +129,9 @@ export const commentsModule = {
     },
     getAddCommentStatus: (state) => {
       return state.commentAddedStatus;
+    },
+    getUpdatedCommentStatus: (state) => {
+      return state.updatedCommentstatus;
     },
     getDeletedCommentStatus: (state) => {
       return state.deleteCommentStatus;

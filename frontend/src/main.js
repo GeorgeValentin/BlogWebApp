@@ -25,6 +25,7 @@ import {
   faPenNib,
   faUser,
   faCalendarDay,
+  faPenToSquare,
 } from "@fortawesome/free-solid-svg-icons";
 
 library.add(
@@ -42,7 +43,8 @@ library.add(
   faTrashCan,
   faPenNib,
   faUser,
-  faCalendarDay
+  faCalendarDay,
+  faPenToSquare
 );
 
 axios.defaults.baseURL = "http://localhost:8000/";

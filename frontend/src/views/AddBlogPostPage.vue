@@ -98,6 +98,16 @@ export default {
   },
   methods: {
     ...mapActions("blogPostsModule", ["addBlogPost"]),
+    handleLogout: function () {
+      this.logout();
+      this.$router.push("/login");
+    },
+    setAutoHideAlert: function () {
+      setTimeout(() => {
+        this.message = "";
+        this.alertStatus = "";
+      }, 3500);
+    },
     createBlogPost: async function (userId, blogPostData) {
       const blogPostToAdd = {
         title: blogPostData.title,
@@ -112,7 +122,11 @@ export default {
           this.$router.push("/");
         }
       } catch (error) {
+        if (error.response.status === 401 || error.response.status === 403) {
+          this.handleLogout();
+        }
         this.errorMessage = filterErrorMessages(error.response.status);
+        this.setAutoHideAlert();
       }
     },
     goBackHome: function () {

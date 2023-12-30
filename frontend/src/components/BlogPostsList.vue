@@ -183,7 +183,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex";
+import { mapGetters } from "vuex";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import AlertMessage from "@/components/AlertMessage";
 import LoadingSpinner from "./LoadingSpinner";
@@ -205,7 +205,6 @@ export default {
     ...mapGetters("auth", ["getLoggedInStatus", "getLoggedInUserData"]),
   },
   methods: {
-    ...mapActions("blogPostsModule", ["deleteBlogPost"]),
     formatBlogPostContent(content) {
       let arrOfContentWords = content.split(" ");
       return arrOfContentWords.slice(0, this.contentSize).join(" ");

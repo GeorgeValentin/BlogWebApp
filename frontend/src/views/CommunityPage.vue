@@ -40,11 +40,18 @@ export default {
   },
   methods: {
     ...mapActions("blogPostsModule", ["getBlogPostsOfCommunity"]),
+    handleLogout: function () {
+      this.logout();
+      this.$router.push("/login");
+    },
     getBlogPostsOfOthers: async function (userId) {
       try {
         await this.getBlogPostsOfCommunity(userId);
         this.loadingStatus = false;
       } catch (error) {
+        if (error.response.status === 401 || error.response.status === 403) {
+          this.handleLogout();
+        }
         this.loadingStatus = true;
         this.errorMessage = filterErrorMessages(error.response.status);
       } finally {
