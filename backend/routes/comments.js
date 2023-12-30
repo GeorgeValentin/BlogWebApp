@@ -1,36 +1,37 @@
-const router = require('express').Router();
-const { db } = require('../firebaseConfig');
-const utils = require('../utils/utils');
-const checkUser = require('../middleware/checkUser');
-const checkBlogPost = require('../middleware/checkBlogPost');
-const checkComment = require('../middleware/checkComment');
-const auth = require('../middleware/auth');
+const router = require("express").Router();
+const { db } = require("../firebaseConfig");
+const utils = require("../utils/utils");
+const checkUser = require("../middleware/checkUser");
+const checkBlogPost = require("../middleware/checkBlogPost");
+const checkComment = require("../middleware/checkComment");
+const auth = require("../middleware/auth");
 
 router
   // -> get all comments of blog post of logged in user
-  .route('/users/:userId/blogPosts/:blogPostId/comments')
+  .route("/users/:userId/blogPosts/:blogPostId/comments")
   .get(auth, checkUser, checkBlogPost, async (req, res) => {
     const { userId, blogPostId } = req.params;
     const loggedInUser = req.user;
 
     const commentsCollection = db
-      .collection('comments')
-      .where('authorId', '==', userId)
-      .where('blogPostId', '==', blogPostId);
+      .collection("comments")
+      .where("authorId", "==", userId)
+      .where("blogPostId", "==", blogPostId);
 
     const commentDocs = await commentsCollection.get();
     let response = [];
 
     commentDocs.forEach((commentDoc) => {
       const commentDocData = commentDoc.data();
-      response.push(commentDocData);
 
-      // To Do
-      if (commentDocData.authorId !== loggedInUser.userId) {
-        console.log('He is not the author! Can only view it!');
-      } else {
-        console.log('He is the author! Can work on it!');
-      }
+      const { ...commentCopy } = commentDocData;
+
+      const commentWithAuthorName = {
+        ...commentCopy,
+        authorName: loggedInUser.username,
+      };
+
+      response.push(commentWithAuthorName);
     });
 
     return res.status(200).json(response);
@@ -38,22 +39,33 @@ router
   // -> add a comment to a blog post that is (TBD - not of the post of the logged in user)
   // -> the logged in user should add comments to other people's posts
   .post(auth, checkUser, checkBlogPost, async (req, res) => {
+    if (
+      req.body.content === undefined ||
+      req.body.content === null ||
+      req.body.content === ""
+    ) {
+      return res.status(400).json({
+        message: "Cannot add an empty comment! Please try again!",
+      });
+    }
+
     const loggedInUser = req.user;
     const { userId, blogPostId } = req.params;
     const commentToAdd = req.body;
 
     // -> we don't want the creator of the blogPost to be able to comment on his own post
     if (loggedInUser.userId === userId) {
-      console.log('HIT');
+      console.log("HIT");
       return res.status(401).json({
-        message: 'Cannot add comment! You are the owner of the post!',
+        message: "Cannot add comment! You are the owner of the post!",
       });
     }
 
-    const commentsCollection = db.collection('comments');
+    const commentsCollection = db.collection("comments");
 
     commentToAdd.authorId = loggedInUser.userId;
     commentToAdd.blogPostId = blogPostId;
+    commentToAdd.lastModifiedAt = new Date().toLocaleDateString();
 
     const addedComment = await commentsCollection.add(commentToAdd);
     commentToAdd.commentId = addedComment.id;
@@ -78,7 +90,7 @@ router
   // -> get a comment by id (of any user)
   // -> if the logged in user if the author then he can further work on his comment
   // -> if he is not the author, then he can read it and take the feedback and try to improve his work
-  .route('/users/:userId/blogPosts/:blogPostId/comments/:commentId')
+  .route("/users/:userId/blogPosts/:blogPostId/comments/:commentId")
   .get(auth, checkUser, checkBlogPost, checkComment, async (req, res) => {
     const { userId, blogPostId, commentId } = req.params;
 
@@ -86,9 +98,9 @@ router
 
     let response = [];
     const commentsCollection = db
-      .collection('comments')
-      .where('blogPostId', '==', blogPostId)
-      .where('commentId', '==', commentId);
+      .collection("comments")
+      .where("blogPostId", "==", blogPostId)
+      .where("commentId", "==", commentId);
 
     await commentsCollection
       .get()
@@ -98,7 +110,7 @@ router
         });
       })
       .catch((error) => {
-        console.log('Error getting documents: ', error);
+        console.log("Error getting documents: ", error);
       });
 
     return res.status(200).json(response);
@@ -113,17 +125,20 @@ router
     if (loggedInUser.userId === userId) {
       return res
         .status(401)
-        .json({ message: 'Cannot update comment! The owner has to log in!' });
+        .json({ message: "Cannot update comment! The owner has to log in!" });
     }
 
     // -> update the "comments" collection
     req.commentDocData.content = commentToUpdate.content;
+    req.commentDocData.lastModifiedAt = new Date().toLocaleDateString();
+
     await req.commentDocRef.update(req.commentDocData);
 
     // -> update the "blogPosts" collection
     for (const comment of req.blogPostDocData.comments) {
       if (comment.commentId === commentId) {
         comment.content = commentToUpdate.content;
+        comment.lastModifiedAt = new Date().toLocaleDateString();
       }
     }
     await req.blogPostDocRef.update({ comments: req.blogPostDocData.comments });
@@ -159,7 +174,7 @@ router
     if (loggedInUser.userId === userId) {
       return res
         .status(401)
-        .json({ message: 'Cannot delete comment! The owner has to log in!' });
+        .json({ message: "Cannot delete comment! The owner has to log in!" });
     }
 
     // -> delete the comment from the "comments" collection
@@ -180,7 +195,7 @@ router
     );
 
     if (blogPostIndex === -1) {
-      return res.status(404).json({ message: 'Blog post not found!' });
+      return res.status(404).json({ message: "Blog post not found!" });
     }
 
     const updatedBlogPostsArray = [...req.userDocData.blogPosts];

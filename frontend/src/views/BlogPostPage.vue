@@ -1,6 +1,6 @@
 <template>
   <article
-    class="blog-post-page d-flex justify-content-center align-items-center"
+    class="page-element d-flex justify-content-center align-items-center"
   >
     <div class="card">
       <div class="card-body">
@@ -72,7 +72,10 @@
           </div>
         </div>
 
-        <div v-if="blogPostOfLoggedInUserStatus === false">Add Comments</div>
+        <div v-if="blogPostOfLoggedInUserStatus === false">
+          <comments-list :commentsList="getComments" @addComment="addComment" />
+        </div>
+
         <div
           class="d-flex justify-content-center align-items-center flex-column gap-2 my-3"
           v-else
@@ -97,11 +100,11 @@
         </div>
       </div>
 
-      <div v-if="errStatus === 'error'">
+      <div v-if="errStatus === 'error'" class="mt-4">
         <alert-message :msg="message" alertType="alert-danger" />
       </div>
 
-      <div v-if="errStatus === 'success'">
+      <div v-if="errStatus === 'success'" class="mt-4">
         <alert-message :msg="message" alertType="alert-success" />
       </div>
     </div>
@@ -112,6 +115,7 @@
 import { filterErrorMessages } from "@/utils/utility";
 import { mapActions, mapGetters } from "vuex";
 import AlertMessage from "@/components/AlertMessage";
+import CommentsList from "@/components/CommentsList";
 
 export default {
   name: "BlogPostPage",
@@ -128,28 +132,44 @@ export default {
       blogPostOfLoggedInUserStatus: false,
     };
   },
-  components: { AlertMessage },
+  components: { AlertMessage, CommentsList },
   computed: {
     ...mapGetters("auth", ["getLoggedInStatus", "getLoggedInUserData"]),
     ...mapGetters("blogPostsModule", [
       "getBlogPost",
       "getBlogPostUpdateStatus",
     ]),
+    ...mapGetters("commentsModule", ["getComments", "getAddCommentStatus"]),
   },
   created() {
     this.blogPostId = this.$route.params.blogPostId;
     this.authorId = this.$route.params.authorId;
 
-    if (this.authorId === this.getLoggedInUserData.userId) {
-      this.blogPostOfLoggedInUserStatus = true;
-      this.authorId = this.getLoggedInUserData.userId;
+    if (this.getLoggedInStatus === true && this.getLoggedInUserData !== null) {
+      if (this.authorId === this.getLoggedInUserData.userId) {
+        this.blogPostOfLoggedInUserStatus = true;
+        this.authorId = this.getLoggedInUserData.userId;
+      }
+
+      this.getEntireListOfComments(
+        this.getLoggedInUserData.userId,
+        this.blogPostId
+      );
     }
 
     this.getBlogPostByItsId(this.authorId, this.blogPostId);
   },
   methods: {
     ...mapActions("blogPostsModule", ["getBlogPostById", "updateBlogPost"]),
-
+    ...mapActions("commentsModule", [
+      "getCommentsOfBlogPost",
+      "addCommentToBlogPost",
+    ]),
+    ...mapActions("auth", ["logout"]),
+    handleLogout: function () {
+      this.logout();
+      this.$router.push("/login");
+    },
     // -> when you have more than one argument to pass to vuex module pass it as object or an array
     // since vuex "dispatching" can only take two args: 1. the name of the action and 2. the payload
     getBlogPostByItsId: async function (userId, blogPostId) {
@@ -163,6 +183,9 @@ export default {
 
         this.loadingStatus = false;
       } catch (error) {
+        if (error.response.status === 401 || error.response.status === 403) {
+          this.handleLogout();
+        }
         this.message = filterErrorMessages(error.response.status);
         this.errStatus = "error";
         this.loadingStatus = true;
@@ -193,6 +216,42 @@ export default {
         this.errStatus = "error";
       }
     },
+    getEntireListOfComments: async function (userId, blogPostId) {
+      try {
+        await this.getCommentsOfBlogPost({
+          userId,
+          blogPostId,
+        });
+      } catch (error) {
+        this.message = filterErrorMessages(error.response.status);
+        this.errStatus = "error";
+      }
+    },
+    addComment: async function (payload) {
+      const { userId, blogPostId, commentData } = payload;
+
+      const comment = {
+        content: commentData,
+      };
+
+      try {
+        await this.addCommentToBlogPost({
+          loggedInUserId: this.getLoggedInUserData.userId,
+          userId: userId,
+          blogPostId: blogPostId,
+          commentToAdd: comment,
+        });
+
+        if (this.getAddCommentStatus === true) {
+          this.message = "Comment added successfully!";
+          this.errStatus = "success";
+        }
+      } catch (error) {
+        console.log(error);
+        this.message = filterErrorMessages(error.response.status);
+        this.errStatus = "error";
+      }
+    },
     goBackHome: function () {
       this.$router.push("/");
     },
@@ -203,12 +262,9 @@ export default {
 <style scoped>
 .card {
   width: 35rem;
-  height: 35rem;
+  height: 78%;
   margin: auto;
   background-color: #f6e58d;
-}
-.blog-post-page {
-  height: 70vh;
 }
 .form-field-group {
   width: 95%;
@@ -238,6 +294,7 @@ export default {
 }
 
 #text-area-highlight-text {
-  padding: 4rem;
+  padding: 0.1rem;
+  text-align: justify;
 }
 </style>

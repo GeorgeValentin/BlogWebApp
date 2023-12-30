@@ -95,7 +95,9 @@ export default {
     },
     handleEditBlogPost: function (blogPostsId) {
       try {
-        this.$router.push(`/blogPostPage/${blogPostsId}`);
+        this.$router.push(
+          `/blogPostPage/${blogPostsId}/blogPostOwner/${this.getLoggedInUserData.userId}`
+        );
       } catch (error) {
         console.log(error);
         this.errorMessage = filterErrorMessages(error);

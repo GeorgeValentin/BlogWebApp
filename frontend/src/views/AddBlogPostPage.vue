@@ -1,5 +1,5 @@
 <template>
-  <article class="overflow-hidden">
+  <article class="overflow-hidden page-element">
     <header>
       <h2 class="add-blog-post-page-title mt-5 mb-4 fw-bold fs-2">
         Add a new Blog Post

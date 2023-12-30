@@ -1,11 +1,11 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 const config = process.env;
 
 const verifyToken = (req, res, next) => {
-  const token = req.headers['authorization'];
+  const token = req.headers["authorization"];
 
   if (!token) {
-    return res.status(403).send('Please login first!');
+    return res.status(403).send("Please login first!");
   }
 
   try {
@@ -14,11 +14,12 @@ const verifyToken = (req, res, next) => {
     const userPayload = {
       userEmail: decoded.email,
       userId: decoded.userId,
+      username: decoded.username,
     };
 
     req.user = userPayload;
   } catch (err) {
-    return res.status(401).send('Invalid Token');
+    return res.status(401).send("Invalid Token");
   }
 
   // move to the next execution point

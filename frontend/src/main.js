@@ -23,6 +23,8 @@ import {
   faComment,
   faTrashCan,
   faPenNib,
+  faUser,
+  faCalendarDay,
 } from "@fortawesome/free-solid-svg-icons";
 
 library.add(
@@ -38,7 +40,9 @@ library.add(
   faUserGroup,
   faComment,
   faTrashCan,
-  faPenNib
+  faPenNib,
+  faUser,
+  faCalendarDay
 );
 
 axios.defaults.baseURL = "http://localhost:8000/";

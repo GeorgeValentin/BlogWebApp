@@ -37,7 +37,7 @@ export default {
 <style scoped>
 #nav-bar {
   border-bottom: 1px solid #ddd;
-  height: 75px;
+  height: 6vh;
   width: 100%;
 }
 
