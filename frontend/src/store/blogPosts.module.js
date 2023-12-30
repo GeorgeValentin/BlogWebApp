@@ -2,7 +2,9 @@ import BlogPostsService from "@/services/blogPosts.service";
 
 const initialState = {
   blogPostsList: [],
+  blogPostsListCommunity: [],
   blogPost: {},
+  getBlogPostsCommunityStatus: false,
   getBlogPostStatus: false,
   addedBlogPostStatus: false,
   updatedBlogPostStatus: false,
@@ -42,17 +44,18 @@ export const blogPostsModule = {
     getBlogPostsOfCommunity({ commit }, userId) {
       return BlogPostsService.getBlogPostsOfOthers(userId).then(
         (response) => {
-          commit("getBlogPostsSuccess", response);
+          // console.log(response);
+          commit("getBlogPostsCommunitySuccess", response);
           return Promise.resolve(response);
         },
         (error) => {
-          commit("getBlogPostsFailure");
+          commit("getBlogPostsCommunityFailure");
           return Promise.reject(error);
         }
       );
     },
-    getBlogPostByIdOfLoggedInUser({ commit }, { userId, blogPostId }) {
-      return BlogPostsService.getBlogPostById(userId, blogPostId).then(
+    getBlogPostById({ commit }, { userId, blogPostId }) {
+      return BlogPostsService.getBlogPostByIdEndpoint(userId, blogPostId).then(
         (response) => {
           commit("getBlogPostByIdSuccess", response);
           return Promise.resolve(response);
@@ -124,6 +127,13 @@ export const blogPostsModule = {
     getBlogPostsFailure(state) {
       state.getBlogPostStatus = false;
     },
+    getBlogPostsCommunitySuccess(state, blogPostsCommunity) {
+      state.blogPostsListCommunity = blogPostsCommunity.data;
+      state.getBlogPostsCommunityStatus = true;
+    },
+    getBlogPostsCommunityFailure(state) {
+      state.getBlogPostsCommunityStatus = false;
+    },
     getBlogPostByIdSuccess(state, blogPost) {
       state.blogPost = blogPost.data;
       state.getBlogPostStatus = true;
@@ -155,6 +165,9 @@ export const blogPostsModule = {
   getters: {
     getBlogPosts: (state) => {
       return state.blogPostsList;
+    },
+    getBlogPostsCommunity: (state) => {
+      return state.blogPostsListCommunity;
     },
     getBlogPost: (state) => {
       return state.blogPost;

@@ -1,5 +1,9 @@
 <template>
-  <article class="container-fluid">
+  <div v-if="loadingStatus === true">
+    <loading-spinner />
+  </div>
+
+  <article class="container-fluid" v-else>
     <!-- Community Page Title -->
     <div
       v-if="pageName === 'community'"
@@ -167,7 +171,7 @@
             <!-- Navigate to Blog Post page where the user can read it all (must be logged in)-->
             <button
               class="read-more-btn fw-bold"
-              @click="handleReadMore(blogPost.blogPostId)"
+              @click="handleReadMore(blogPost.blogPostId, blogPost.authorId)"
             >
               Read More
             </button>
@@ -181,14 +185,16 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import AlertMessage from "../components/AlertMessage";
+import AlertMessage from "@/components/AlertMessage";
+import LoadingSpinner from "./LoadingSpinner";
 
 export default {
   name: "BlogPostsList",
-  props: ["blogPosts", "pageName", "errorMsg"],
+  props: ["blogPosts", "pageName", "errorMsg", "loadingStatus"],
   components: {
     FontAwesomeIcon,
     AlertMessage,
+    LoadingSpinner,
   },
   data() {
     return {
@@ -197,9 +203,7 @@ export default {
   },
   computed: {
     ...mapGetters("auth", ["getLoggedInStatus", "getLoggedInUserData"]),
-    ...mapGetters("blogPostsModule", ["getBlogPosts"]),
   },
-  mounted() {},
   methods: {
     ...mapActions("blogPostsModule", ["deleteBlogPost"]),
     formatBlogPostContent(content) {
@@ -209,13 +213,15 @@ export default {
     capitalizeTitle(title) {
       return title.charAt(0).toUpperCase() + title.substring(1);
     },
-    handleReadMore(blogPostId) {
+    handleReadMore(blogPostId, authorId) {
       if (this.getLoggedInStatus === false) {
         // navigate to login
         this.$router.push("/login");
       } else {
         // navigate to BlogPost Page
-        this.$router.push(`/blogPostPage/${blogPostId}`);
+        this.$router.push(
+          `/blogPostPage/${blogPostId}/blogPostOwner/${authorId}`
+        );
       }
     },
   },

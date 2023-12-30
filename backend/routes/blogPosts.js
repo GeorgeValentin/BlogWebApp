@@ -256,6 +256,7 @@ router
     req.blogPostDocData.title = blogPostToUpdate.title;
     req.blogPostDocData.content = blogPostToUpdate.content;
     req.blogPostDocData.category = blogPostToUpdate.category;
+    req.blogPostDocData.lastModifiedAt = new Date().toLocaleDateString();
 
     await req.blogPostDocRef.update(req.blogPostDocData);
 
@@ -264,6 +265,7 @@ router
         blogPost.content = blogPostToUpdate.content;
         blogPost.title = blogPostToUpdate.title;
         blogPost.category = blogPostToUpdate.category;
+        blogPost.lastModifiedAt = new Date().toLocaleDateString();
       }
     }
     await req.userDocRef.update({ blogPosts: req.userDocData.blogPosts });

@@ -20,9 +20,9 @@ class BlogPostsService {
     );
   }
 
-  async getBlogPostById(loggedInUserId, blogPostId) {
+  async getBlogPostByIdEndpoint(userId, blogPostId) {
     return await axios.get(
-      `${API_URL}/users/${String(loggedInUserId)}/blogPosts/${blogPostId}`
+      `${API_URL}/users/${String(userId)}/blogPosts/${blogPostId}`
     );
   }
 

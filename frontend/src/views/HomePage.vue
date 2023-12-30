@@ -5,6 +5,7 @@
       :blogPosts="getBlogPosts"
       pageName="home"
       :errorMsg="errorMessage"
+      :loadingStatus="loadingStatus"
     />
   </div>
 
@@ -18,6 +19,7 @@
       @delete="handleDeleteBlogPost"
       @edit="handleEditBlogPost"
       :errorMsg="errorMessage"
+      :loadingStatus="loadingStatus"
     />
   </div>
 </template>
@@ -26,13 +28,14 @@
 // @ is an alias to /src
 import { mapGetters, mapActions } from "vuex";
 import BlogPostsList from "@/components/BlogPostsList";
-import { filterErrorMessages } from "../utils/utility";
+import { filterErrorMessages } from "@/utils/utility";
 
 export default {
   name: "HomePage",
   data() {
     return {
       errorMessage: "",
+      loadingStatus: true,
     };
   },
   components: { BlogPostsList },
@@ -60,17 +63,26 @@ export default {
     getBlogPostsOfUser: async function (userId) {
       try {
         await this.getBlogPostsOfLoggedInUser(userId);
+        this.loadingStatus = false;
       } catch (error) {
+        this.loadingStatus = true;
+
         console.log(error);
         this.errorMessage = filterErrorMessages(error.response.status);
+      } finally {
+        this.loadingStatus = false;
       }
     },
     getAllBlogPosts: async function () {
       try {
         await this.getEntireListOfBlogPosts();
+        this.loadingStatus = false;
       } catch (error) {
+        this.loadingStatus = true;
         console.log(error);
         this.errorMessage = filterErrorMessages(error.response.status);
+      } finally {
+        this.loadingStatus = false;
       }
     },
     handleDeleteBlogPost: async function (userId, blogPostId) {

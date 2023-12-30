@@ -77,8 +77,8 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import { filterErrorMessages } from "../utils/utility";
-import AlertMessage from "../components/AlertMessage";
+import { filterErrorMessages } from "@/utils/utility";
+import AlertMessage from "@/components/AlertMessage";
 
 export default {
   name: "AddBlogPostPage",

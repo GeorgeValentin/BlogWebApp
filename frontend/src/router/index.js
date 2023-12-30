@@ -34,7 +34,7 @@ const routes = [
     component: AddBlogPostPage,
   },
   {
-    path: "/blogPostPage/:blogPostId",
+    path: "/blogPostPage/:blogPostId/blogPostOwner/:authorId",
     name: "blogPostPage",
     component: BlogPostPage,
   },

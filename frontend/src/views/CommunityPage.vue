@@ -1,15 +1,16 @@
 <template>
   <blog-posts-list
-    :blogPosts="getBlogPosts"
+    :blogPosts="getBlogPostsCommunity"
     pageName="community"
     :errorMsg="errorMessage"
+    :loadingStatus="loadingStatus"
   />
 </template>
 
 <script>
 import BlogPostsList from "@/components/BlogPostsList";
 import { mapGetters, mapActions } from "vuex";
-import { filterErrorMessages } from "../utils/utility";
+import { filterErrorMessages } from "@/utils/utility";
 
 export default {
   name: "CommunityPage",
@@ -17,11 +18,12 @@ export default {
   data() {
     return {
       errorMessage: "",
+      loadingStatus: true,
     };
   },
   computed: {
     ...mapGetters("auth", ["getLoggedInStatus", "getLoggedInUserData"]),
-    ...mapGetters("blogPostsModule", ["getBlogPosts"]),
+    ...mapGetters("blogPostsModule", ["getBlogPostsCommunity"]),
   },
   created() {
     // -> get the blog posts of the other users (not the logged in one)
@@ -41,8 +43,12 @@ export default {
     getBlogPostsOfOthers: async function (userId) {
       try {
         await this.getBlogPostsOfCommunity(userId);
+        this.loadingStatus = false;
       } catch (error) {
+        this.loadingStatus = true;
         this.errorMessage = filterErrorMessages(error.response.status);
+      } finally {
+        this.loadingStatus = false;
       }
     },
   },

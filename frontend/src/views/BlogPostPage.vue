@@ -20,11 +20,17 @@
           class="form-field-group importantPublications d-flex justify-content-between m-auto p-2"
         >
           <span class="fw-bold text-dark me-1 fs-6">Title:</span>
+
           <input
             type="text"
             class="input-container border border-1 border-secondary rounded"
             v-model="getBlogPost.title"
+            v-if="blogPostOfLoggedInUserStatus === true"
           />
+
+          <div v-else class="text-field-highlight">
+            {{ getBlogPost.title }}
+          </div>
         </div>
 
         <div
@@ -37,22 +43,39 @@
             type="text"
             class="input-container border border-1 border-secondary rounded"
             v-model="getBlogPost.category"
+            v-if="blogPostOfLoggedInUserStatus === true"
           />
+
+          <div v-else class="text-field-highlight">
+            {{ getBlogPost.category }}
+          </div>
         </div>
 
         <div
           class="form-field-group name d-flex justify-content-between align-items-center m-auto p-2"
         >
           <span class="fw-bold text-dark me-1 fs-6">Content:</span>
+
           <textarea
             type="text"
             class="input-container content-box border border-1 border-secondary rounded"
             v-model="getBlogPost.content"
+            v-if="blogPostOfLoggedInUserStatus === true"
           ></textarea>
+
+          <div
+            v-else
+            id="text-area-highlight-text"
+            class="text-field-highlight"
+          >
+            {{ getBlogPost.content }}
+          </div>
         </div>
 
+        <div v-if="blogPostOfLoggedInUserStatus === false">Add Comments</div>
         <div
           class="d-flex justify-content-center align-items-center flex-column gap-2 my-3"
+          v-else
         >
           <button
             type="button"
@@ -81,8 +104,6 @@
       <div v-if="errStatus === 'success'">
         <alert-message :msg="message" alertType="alert-success" />
       </div>
-
-      <div v-else></div>
     </div>
   </article>
 </template>
@@ -90,18 +111,21 @@
 <script>
 import { filterErrorMessages } from "@/utils/utility";
 import { mapActions, mapGetters } from "vuex";
-import AlertMessage from "../components/AlertMessage";
+import AlertMessage from "@/components/AlertMessage";
 
 export default {
   name: "BlogPostPage",
   data() {
     return {
       blogPostId: "",
+      authorId: "",
       blogPost: {},
       message: "",
       errorMessage: "",
       username: "",
       errStatus: "",
+      loadingStatus: true,
+      blogPostOfLoggedInUserStatus: false,
     };
   },
   components: { AlertMessage },
@@ -114,28 +138,37 @@ export default {
   },
   created() {
     this.blogPostId = this.$route.params.blogPostId;
+    this.authorId = this.$route.params.authorId;
 
-    if (
-      this.getLoggedInStatus !== false &&
-      this.getLoggedInUserData !== undefined
-    ) {
-      this.getBlogPostById(this.getLoggedInUserData.userId, this.blogPostId);
-      this.username = this.getLoggedInUserData.username;
+    if (this.authorId === this.getLoggedInUserData.userId) {
+      this.blogPostOfLoggedInUserStatus = true;
+      this.authorId = this.getLoggedInUserData.userId;
     }
+
+    this.getBlogPostByItsId(this.authorId, this.blogPostId);
   },
   methods: {
-    ...mapActions("blogPostsModule", [
-      "getBlogPostByIdOfLoggedInUser",
-      "updateBlogPost",
-    ]),
+    ...mapActions("blogPostsModule", ["getBlogPostById", "updateBlogPost"]),
 
     // -> when you have more than one argument to pass to vuex module pass it as object or an array
     // since vuex "dispatching" can only take two args: 1. the name of the action and 2. the payload
-    getBlogPostById: async function (userId, blogPostId) {
-      await this.getBlogPostByIdOfLoggedInUser({
-        userId,
-        blogPostId,
-      });
+    getBlogPostByItsId: async function (userId, blogPostId) {
+      try {
+        await this.getBlogPostById({
+          userId,
+          blogPostId,
+        });
+
+        this.username = this.getBlogPost.authorName;
+
+        this.loadingStatus = false;
+      } catch (error) {
+        this.message = filterErrorMessages(error.response.status);
+        this.errStatus = "error";
+        this.loadingStatus = true;
+      } finally {
+        this.loadingStatus = false;
+      }
     },
     editBlogPost: async function (userId, blogPostId, blogPost) {
       const updatedBlogPost = {
@@ -196,5 +229,15 @@ export default {
 }
 .update-status-msg-container > div {
   font-weight: bold;
+}
+.text-field-highlight {
+  border: 2px solid black;
+  padding: 0.5rem;
+  width: 75%;
+  border-radius: 0.25rem;
+}
+
+#text-area-highlight-text {
+  padding: 4rem;
 }
 </style>

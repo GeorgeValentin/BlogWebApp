@@ -1,5 +1,9 @@
 <template>
-  <article class="login-page col-md-12">
+  <div v-if="pageLoadingStatus === true">
+    <loading-spinner />
+  </div>
+
+  <article class="login-page col-md-12" v-else>
     <header>
       <h2 class="fw-bolder mt-4 mb-5 fs-1 text-primary">
         Login into your Account
@@ -77,6 +81,7 @@
 import { Form, Field, ErrorMessage } from "vee-validate";
 import * as yup from "yup";
 import { mapActions } from "vuex";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default {
   name: "RegisterPage",
@@ -84,6 +89,7 @@ export default {
     Form,
     Field,
     ErrorMessage,
+    LoadingSpinner,
   },
   data() {
     const schema = yup.object().shape({
@@ -92,11 +98,15 @@ export default {
     });
 
     return {
+      pageLoadingStatus: true,
       loading: false,
       message: "",
       schema,
       user: {},
     };
+  },
+  created() {
+    this.pageLoadingStatus = false;
   },
   methods: {
     ...mapActions("auth", ["login"]),
