@@ -30,7 +30,7 @@
               "{{ comment.content }}"
             </div>
             <div
-              class="comment-details-container d-flex justify-content-start align-items-end"
+              class="comment-details-container d-flex justify-content-center align-items-end"
             >
               <div
                 class="d-flex justify-content-center align-items-center gap-2"
@@ -39,37 +39,42 @@
                 <span>{{ comment.authorName }}</span>
               </div>
 
+              <!-- allow the deletion only for the comments of the logged in user -->
+              <div
+                v-if="
+                  getLoggedInUserData !== null &&
+                  comment.authorId === getLoggedInUserData.userId
+                "
+                class="d-flex justify-content-center align-items-center gap-3"
+              >
+                <button
+                  class="d-flex justify-content-center align-items-center gap-2 btn btn-danger border border-2 border-danger"
+                  @click="
+                    $emit(
+                      'deleteComment',
+                      userId,
+                      blogPostId,
+                      comment.commentId
+                    )
+                  "
+                >
+                  <font-awesome-icon icon="fa-trash" />
+                </button>
+
+                <button
+                  class="d-flex justify-content-center align-items-center gap-2 btn btn-warning border border-2 border-warning border-dark"
+                  @click="toggleEdit(comment.commentId)"
+                >
+                  <font-awesome-icon icon="fa-pen-to-square" />
+                </button>
+              </div>
+
               <div
                 class="d-flex justify-content-center align-items-center gap-2"
               >
                 <font-awesome-icon icon="calendar-day" />
                 <span>{{ comment.lastModifiedAt }}</span>
               </div>
-            </div>
-
-            <!-- allow the deletion only for the comments of the logged in user -->
-            <div
-              v-if="
-                getLoggedInUserData.userId !== null &&
-                comment.authorId === getLoggedInUserData.userId
-              "
-              class="comm-action-btns-container d-flex justify-content-center align-items-center"
-            >
-              <button
-                class="d-flex justify-content-center align-items-center gap-2 btn btn-danger border border-2 border-danger"
-                @click="
-                  $emit('deleteComment', userId, blogPostId, comment.commentId)
-                "
-              >
-                <font-awesome-icon icon="fa-trash" />
-              </button>
-
-              <button
-                class="d-flex justify-content-center align-items-center gap-2 btn btn-warning border border-2 border-warning border-dark"
-                @click="handleEditComment(comment.commentId)"
-              >
-                <font-awesome-icon icon="fa-pen-to-square" />
-              </button>
             </div>
           </div>
         </section>
@@ -181,8 +186,13 @@ export default {
       this.commentData = "";
       this.editStatus = false;
     },
-    handleEditComment: function (commentId) {
-      this.editStatus = true;
+    toggleEdit: function (commentId) {
+      if (this.editStatus === false) {
+        this.editStatus = true;
+      } else {
+        this.editStatus = false;
+      }
+
       this.commentId = commentId;
     },
   },
