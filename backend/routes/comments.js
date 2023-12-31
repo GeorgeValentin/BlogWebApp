@@ -134,14 +134,10 @@ router
   });
 
 router
-  // -> get a comment by id (of any user)
-  // -> if the logged in user if the author then he can further work on his comment
-  // -> if he is not the author, then he can read it and take the feedback and try to improve his work
-  .route("/users/:userId/blogPosts/:blogPostId/comments/:commentId")
-  .get(auth, checkUser, checkBlogPost, checkComment, async (req, res) => {
-    const { userId, blogPostId, commentId } = req.params;
-
-    const loggedInUser = req.user;
+  // -> get a comment of a blog post by its id (of any user)
+  .route("/blogPosts/:blogPostId/comments/:commentId")
+  .get(checkBlogPost, checkComment, async (req, res) => {
+    const { blogPostId, commentId } = req.params;
 
     let response = [];
     const commentsCollection = db
