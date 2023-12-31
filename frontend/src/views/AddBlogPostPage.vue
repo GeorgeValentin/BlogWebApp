@@ -46,7 +46,7 @@
         </div>
 
         <div
-          class="d-flex justify-content-center align-items-center flex-column gap-2 my-3"
+          class="add-posts-action-btns-container d-flex justify-content-center align-items-center flex-column gap-2 my-3"
         >
           <button
             type="button"
@@ -162,5 +162,33 @@ export default {
 .error-message-add-post {
   width: 31%;
   margin: 2rem auto auto;
+}
+
+@media (max-width: 1024px) {
+  .card {
+    width: 23rem;
+    height: 33rem;
+  }
+
+  .form-field-group {
+    flex-direction: column;
+  }
+
+  .input-container {
+    width: 95% !important;
+    margin: auto;
+  }
+
+  .add-posts-action-btns-container {
+    flex-direction: row !important;
+  }
+
+  .add-posts-action-btns-container > button {
+    width: 8rem !important;
+  }
+
+  .error-message-add-post {
+    width: 85%;
+  }
 }
 </style>

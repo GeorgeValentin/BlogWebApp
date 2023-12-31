@@ -1,18 +1,20 @@
 <template>
-  <search-blog-posts
-    @searchRecords="searchBlogs"
-    :myKey="filterKey"
-    :myDir="filterDir"
-    @requestKey="changeKey"
-    @requestDir="changeDir"
-  />
+  <article class="logged-in-blog-posts-list">
+    <search-blog-posts
+      @searchRecords="searchBlogs"
+      :myKey="filterKey"
+      :myDir="filterDir"
+      @requestKey="changeKey"
+      @requestDir="changeDir"
+    />
 
-  <blog-posts-list
-    :blogPosts="getBlogPostsCommunity"
-    pageName="community"
-    :errorMsg="errorMessage"
-    :loadingStatus="loadingStatus"
-  />
+    <blog-posts-list
+      :blogPosts="getBlogPostsCommunity"
+      pageName="community"
+      :errorMsg="errorMessage"
+      :loadingStatus="loadingStatus"
+    />
+  </article>
 </template>
 
 <script>
@@ -100,4 +102,10 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+@media (max-width: 500px) {
+  .logged-in-blog-posts-list {
+    padding: 2rem;
+  }
+}
+</style>

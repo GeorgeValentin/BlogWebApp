@@ -194,7 +194,9 @@ export default {
 </script>
 
 <style scoped>
-.logged-in-blog-posts-list {
-  padding: 2rem;
+@media (max-width: 500px) {
+  .logged-in-blog-posts-list {
+    padding: 2rem;
+  }
 }
 </style>

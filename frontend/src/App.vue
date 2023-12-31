@@ -71,4 +71,10 @@ nav a {
 nav a.router-link-exact-active {
   color: #42b983;
 }
+
+@media (max-width: 500px) {
+  .page-element {
+    height: 84vh;
+  }
+}
 </style>
