@@ -65,11 +65,9 @@ export default {
     ...mapGetters("blogPostsModule", ["getBlogPosts"]),
     searchedBlogPosts: function () {
       return this.getBlogPosts.filter((item) => {
-        console.log(item.authorName);
         return (
           item.title.toLowerCase().match(this.searchTerms.toLowerCase()) ||
-          item.category.toLowerCase().match(this.searchTerms.toLowerCase()) ||
-          item.authorName.toLowerCase().match(this.searchTerms.toLowerCase())
+          item.category.toLowerCase().match(this.searchTerms.toLowerCase())
         );
       });
     },
