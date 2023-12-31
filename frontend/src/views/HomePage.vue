@@ -20,7 +20,7 @@
   <!-- Show user's blog post (read/write, must be logged in) -->
   <!-- -> Make the "Community" button to allow the user that is logged in
   to comment on other user's posts -->
-  <div v-else>
+  <div v-else class="logged-in-blog-posts-list">
     <search-blog-posts
       @searchRecords="searchBlogs"
       :myKey="filterKey"
@@ -192,3 +192,9 @@ export default {
 //   },
 // };
 </script>
+
+<style scoped>
+.logged-in-blog-posts-list {
+  padding: 2rem;
+}
+</style>

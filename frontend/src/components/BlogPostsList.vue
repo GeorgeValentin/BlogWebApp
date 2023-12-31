@@ -87,26 +87,14 @@
                     )
                   "
                 >
-                  <!-- <img
-                    class="delete-img"
-                    src="../assets/delete.png"
-                    alt="delete-img"
-                  /> -->
                   <font-awesome-icon icon="trash" />
-                  <!-- <span class="fw-bold">Delete</span> -->
                 </button>
 
                 <button
                   class="update-btn btn btn-warning text-dark border border-2 border-warning"
                   @click="$emit('edit', blogPost.blogPostId)"
                 >
-                  <!-- <img
-                    class="update-img"
-                    src="../assets/update.png"
-                    alt="update-img"
-                  /> -->
                   <font-awesome-icon icon="pen-to-square" />
-                  <!-- <span class="fw-bold"> Edit </span> -->
                 </button>
               </div>
             </div>
@@ -117,11 +105,6 @@
               <div
                 class="element-with-img-container fs-5 fw-bold d-flex justify-content-center align-items-center gap-2"
               >
-                <!-- <div class="fw-bold fs-6">Author:</div> -->
-
-                <!-- <div
-                  class="d-flex justify-content-center align-items-center flex-row gap-2"
-                > -->
                 <img
                   src="../assets/blogger.png"
                   alt="blogger-img"
@@ -131,9 +114,8 @@
                   {{ blogPost.authorName }}
                 </div>
               </div>
-              <!-- </div> -->
+
               <div class="blog-post-title fs-6 fst-italic">
-                <!-- <div class="fw-bold">Title:</div> -->
                 <div>"{{ capitalizeTitle(blogPost.title) }}"</div>
               </div>
 
@@ -340,18 +322,14 @@ export default {
     height: 22rem;
     width: 27em !important;
   }
-
   .card-title {
     gap: 1.5rem !important;
     margin-bottom: 1.5rem !important;
+    margin-top: 1rem !important;
   }
-  /* .action-btns-container {
-    height: 3.5rem;
-  } */
   .element-with-img-container {
     gap: 0.5rem !important;
   }
-
   .blog-post-title {
     font-size: 1.1rem !important;
   }
@@ -363,6 +341,24 @@ export default {
   }
   .card {
     width: 22.5rem !important;
+  }
+}
+
+@media (max-width: 500px) {
+  .flex-outer-container {
+    padding: 2rem 0 0 !important;
+  }
+
+  .element-with-img-container {
+    gap: 0.35rem !important;
+  }
+
+  .element-with-img-container > div {
+    font-size: 0.9rem !important;
+  }
+
+  .blog-post-title {
+    font-size: 0.9rem !important;
   }
 }
 </style>

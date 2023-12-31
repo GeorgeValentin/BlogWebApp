@@ -95,3 +95,10 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.input-group {
+  width: 75%;
+  margin: auto;
+}
+</style>

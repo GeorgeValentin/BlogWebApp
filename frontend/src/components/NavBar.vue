@@ -59,11 +59,16 @@ export default {
 
 @media (max-width: 500px) {
   #nav-bar {
-    height: 16vh;
+    margin-bottom: 2rem;
+    height: 12vh;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
   #home-link {
-    position: absolute;
+    position: static;
     top: 6%;
   }
 }

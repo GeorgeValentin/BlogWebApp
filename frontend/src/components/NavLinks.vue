@@ -7,10 +7,15 @@
       class="logged-in-links-container d-flex justify-content-center align-items-center gap-2"
     >
       <div class="fst-italic fs-5">
-        Hello <span class="fw-bold text-dark">{{ userEmail }}</span>
+        <div>Hello</div>
+        <div class="fw-bold text-dark">"{{ userEmail }}"</div>
       </div>
 
-      <router-link to="/addBlogPost" class="nav-link">
+      <router-link
+        to="/addBlogPost"
+        id="writePost-btn"
+        class="nav-link logged-in-btn"
+      >
         <button
           class="btn btn-outline-info fw-bold border border-info border-3"
         >
@@ -19,7 +24,11 @@
         </button>
       </router-link>
 
-      <router-link to="/community" class="nav-link">
+      <router-link
+        to="/community"
+        id="community-btn"
+        class="nav-link logged-in-btn"
+      >
         <button
           class="btn btn-outline-primary fw-bold border border-primary border-3"
         >
@@ -28,7 +37,7 @@
         </button>
       </router-link>
 
-      <router-link to="/" class="nav-link">
+      <router-link to="/" id="logout-btn" class="nav-link logged-in-btn">
         <button
           class="btn btn-dark fw-bold border border-dark border-3"
           @click="handleLogout"
@@ -91,15 +100,65 @@ export default {
 }
 
 @media (max-width: 500px) {
+  .nav-links-container {
+    position: static;
+    margin: 0;
+  }
+
+  .nav-link {
+    width: 8rem;
+  }
+
+  .nav-link > button {
+    width: 100%;
+  }
+
   .auth-links-container {
     flex-direction: column;
   }
 
   .logged-in-links-container {
     flex-direction: column;
-    position: absolute;
-    top: 0.8rem;
+    /* position: absolute; */
+    /* top: 0.8rem; */
     width: 13rem;
+  }
+
+  .logged-in-btn {
+    display: none;
+  }
+
+  #community-btn {
+    position: absolute;
+    right: 9.4rem;
+    top: 7.75rem;
+    display: inline-block;
+  }
+
+  #community-btn > button {
+    padding: 0.25rem;
+  }
+
+  #logout-btn {
+    position: absolute;
+    right: 1rem;
+    top: 7.75rem;
+    display: inline-block;
+  }
+
+  #logout-btn > button {
+    padding: 0.25rem;
+  }
+
+  #writePost-btn {
+    position: absolute;
+    left: 1rem;
+    top: 7.75rem;
+    display: inline-block;
+  }
+
+  #writePost-btn > button {
+    padding: 0.25rem;
   }
 }
 </style>
