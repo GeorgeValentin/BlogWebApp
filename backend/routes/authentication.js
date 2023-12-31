@@ -62,6 +62,7 @@ router.route("/login").post(async (req, res) => {
     let loginResponse = {};
 
     // -> check if the email entered by the user is the correct one
+    // -> when finding the correct user, take his/hers id and username as well
     for (let index = 0; index < users.docs.length; index++) {
       if (users.docs[index].data().email === email) {
         userToLogin = users.docs[index].data();

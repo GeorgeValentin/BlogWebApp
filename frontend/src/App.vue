@@ -6,16 +6,18 @@
 
 <script>
 import NavBar from "./components/NavBar";
-import AuthService from "./services/auth.service";
+import { mapActions } from "vuex";
 
 export default {
   name: "App",
   components: {
     NavBar,
   },
+  methods: {
+    ...mapActions("auth", ["logout"]),
+  },
   // -> lifecycle hook that is called after the component has been mounted (= inserted into the DOM),
   // useful if you need to interact with the DOm after it has been fully rendered
-  // -> I am trying to
   mounted() {
     const currentDate = new Date();
     const tokenData = localStorage.getItem("tokenResponse");
@@ -23,22 +25,18 @@ export default {
     if (jsonToken !== null) {
       const tokenExpiry = jsonToken.expiry;
 
+      console.log(
+        tokenExpiry + 3600 <
+          new Date(currentDate).setHours(currentDate.getHours())
+      );
       if (
         tokenExpiry + 3600 <
         new Date(currentDate).setHours(currentDate.getHours())
       ) {
-        AuthService.logout();
+        console.log("Token has expired! Please login again!");
+        this.logout();
+
         location.reload();
-      } else {
-        const reloaded = localStorage.getItem("reloaded");
-        if (
-          reloaded === "true" ||
-          reloaded === undefined ||
-          reloaded === null
-        ) {
-          localStorage.setItem("reloaded", "false");
-          location.reload();
-        }
       }
     }
   },
