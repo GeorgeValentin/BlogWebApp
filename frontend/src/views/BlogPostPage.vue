@@ -1,10 +1,12 @@
 <template>
   <article
-    class="page-element d-flex justify-content-center align-items-center"
+    class="page-element d-flex justify-content-center align-items-center blog-post-page"
   >
     <div class="card">
       <div class="card-body">
-        <header class="d-flex justify-content-center align-items-center gap-3">
+        <header
+          class="title-container d-flex justify-content-center align-items-center gap-3"
+        >
           <h5 class="my-4 fw-bold fs-2">
             Blog post of author "{{ username }}"
           </h5>
@@ -89,23 +91,31 @@
           class="d-flex justify-content-center align-items-center flex-column gap-2 my-3"
           v-else
         >
-          <button
-            type="button"
-            class="btn btn-success fw-bold w-25"
-            @click="
-              editBlogPost(getLoggedInUserData.userId, blogPostId, getBlogPost)
-            "
+          <div
+            class="blog-post-page-btns-container d-flex justify-content-center align-items-center flex-column gap-2"
           >
-            Edit Post
-          </button>
+            <button
+              type="button"
+              class="btn btn-success fw-bold w-25"
+              @click="
+                editBlogPost(
+                  getLoggedInUserData.userId,
+                  blogPostId,
+                  getBlogPost
+                )
+              "
+            >
+              Edit Post
+            </button>
 
-          <button
-            type="button"
-            class="btn btn-dark fw-bold w-25"
-            @click="goBackHome"
-          >
-            Go Back
-          </button>
+            <button
+              type="button"
+              class="btn btn-dark fw-bold w-25"
+              @click="goBackHome"
+            >
+              Go Back
+            </button>
+          </div>
 
           <comments-list
             :eventEmitStatus="false"
@@ -169,6 +179,7 @@ export default {
     ]),
   },
   created() {
+    console.log(this.getCommentsOfOtherUsers);
     this.blogPostId = this.$route.params.blogPostId;
     this.authorId = this.$route.params.authorId;
 
@@ -350,6 +361,7 @@ export default {
       try {
         await this.deleteCommentOfBlogPost({ userId, blogPostId, commentId });
 
+        console.log(this.getDeletedCommentStatus);
         if (this.getDeletedCommentStatus === true) {
           this.message = "Comment deleted successfully!";
           this.alertStatus = "delete";
@@ -423,5 +435,65 @@ export default {
   max-height: 8rem;
   min-height: 8rem;
   overflow: auto;
+}
+
+@media (max-width: 500px) {
+  .blog-post-page {
+    margin-top: 8rem;
+  }
+  .card {
+    min-height: 50rem !important;
+    max-height: 55rem !important;
+
+    width: 24rem !important;
+    margin: 0rem auto 5rem !important;
+  }
+
+  .title-container {
+    margin-bottom: 1rem !important;
+  }
+
+  .title-container > h5 {
+    margin: 0 !important;
+    font-size: 1.2rem !important;
+  }
+
+  .title-container > img {
+    width: 2rem;
+  }
+
+  .form-field-group {
+    flex-direction: column;
+    width: 100%;
+  }
+  .form-field-group > span {
+    width: 100%;
+  }
+
+  .form-field-group > div {
+    width: 100%;
+    padding: 0.25rem;
+  }
+
+  .alert-container {
+    top: 49rem;
+  }
+
+  .input-container {
+    width: 100%;
+  }
+
+  textarea {
+    height: 8rem !important;
+  }
+
+  .blog-post-page-btns-container {
+    flex-direction: row !important;
+    width: 100%;
+  }
+
+  .blog-post-page-btns-container > button {
+    width: 40% !important;
+  }
 }
 </style>

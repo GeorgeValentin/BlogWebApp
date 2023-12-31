@@ -68,10 +68,10 @@ router
           ...commentCopy,
           authorName: userDocData.username,
         };
-
         return commentWithAuthorName;
       }
     });
+
     response = await Promise.all(commentsArray);
 
     // Filter out null & undefined values
@@ -157,7 +157,11 @@ router
       });
 
     return res.status(200).json(response);
-  })
+  });
+
+router
+  // -> get a comment of a blog post by its id (of any user)
+  .route("/users/:userId/blogPosts/:blogPostId/comments/:commentId")
   // -> update comments made to other people's blog posts
   .put(auth, checkComment, checkUser, checkBlogPost, async (req, res) => {
     const commentToUpdate = req.body;

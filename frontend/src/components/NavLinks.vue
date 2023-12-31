@@ -6,7 +6,9 @@
       v-if="userEmail !== null"
       class="logged-in-links-container d-flex justify-content-center align-items-center gap-2"
     >
-      <div class="fst-italic fs-5">
+      <div
+        class="welcome-msg-container fst-italic fs-5 d-flex justify-content-center align-items-center gap-2"
+      >
         <div>Hello</div>
         <div class="fw-bold text-dark">"{{ userEmail }}"</div>
       </div>
@@ -119,8 +121,6 @@ export default {
 
   .logged-in-links-container {
     flex-direction: column;
-    /* position: absolute; */
-    /* top: 0.8rem; */
     width: 13rem;
   }
 
@@ -159,6 +159,11 @@ export default {
 
   #writePost-btn > button {
     padding: 0.25rem;
+  }
+
+  .welcome-msg-container {
+    flex-direction: column !important;
+    gap: 0rem !important;
   }
 }
 </style>

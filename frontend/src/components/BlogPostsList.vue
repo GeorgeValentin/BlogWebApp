@@ -188,6 +188,7 @@ export default {
       contentSize: 36,
     };
   },
+
   computed: {
     ...mapGetters("auth", ["getLoggedInStatus", "getLoggedInUserData"]),
   },

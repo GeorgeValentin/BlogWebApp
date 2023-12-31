@@ -105,7 +105,7 @@
 
           <button
             v-if="getLoggedInStatus === true && getLoggedInUserData !== null"
-            class="d-flex justify-content-center align-items-center flex-row gap-2 btn btn-primary border border-2 border-primary"
+            class="add-comment-btn d-flex justify-content-center align-items-center flex-row gap-2 btn btn-primary border border-2 border-primary"
             @click="addComment"
           >
             <font-awesome-icon icon="fa-plus" />
@@ -247,5 +247,41 @@ export default {
   position: absolute;
   top: 4.8rem;
   right: 0.5rem;
+}
+
+@media (max-width: 500px) {
+  .comment-details-container {
+    gap: 1rem;
+  }
+
+  .comment-details-container > div {
+    gap: 0.25rem !important;
+  }
+  .comment-details-container > div:nth-of-type(2) {
+    gap: 0.5rem !important;
+  }
+
+  .add-comment-element {
+    width: 90%;
+  }
+
+  .form-floating {
+    margin-top: 0rem;
+    width: 100%;
+  }
+
+  .comments-section {
+    min-height: 10rem;
+    max-height: 10rem;
+  }
+
+  .comm-action-container {
+    width: 100%;
+  }
+
+  .add-comment-btn {
+    padding: 0.15rem;
+    width: 6rem;
+  }
 }
 </style>
