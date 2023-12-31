@@ -45,9 +45,7 @@
       >
         <!-- No one logged in Title -->
         <header>
-          <h2 class="fw-bold fs-2 m-0">
-            All Blog Posts since you have last visited!!!
-          </h2>
+          <h2 class="fw-bold fs-2 m-0">Blog Posts</h2>
         </header>
       </div>
     </div>
@@ -62,10 +60,7 @@
         alt="missing-blog-posts"
       />
 
-      <p>
-        There are not any Blog Posts added! Spread the word and grow your
-        community of people with common interests!
-      </p>
+      <p>No Blog Posts found at the moment!</p>
     </div>
 
     <div
@@ -77,8 +72,6 @@
         :key="blogPost.blogPostId"
       >
         <div class="card border-2 border-light rounded" style="width: 20rem">
-          <!-- Blog Post Avatar -> We'll see if we'll add it -->
-
           <div class="card-body">
             <div v-if="pageName === 'home' && getLoggedInStatus === true">
               <div class="action-btns-container">
@@ -148,7 +141,7 @@
             </header>
 
             <div class="creation-date-container fs-6 fst-italic">
-              {{ blogPost.creationDate }}
+              {{ blogPost.lastModifiedAt }}
             </div>
 
             <div

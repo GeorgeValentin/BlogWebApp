@@ -1,8 +1,16 @@
 <template>
   <!-- Show all Blog Posts (Read-Only) -->
   <div v-if="getLoggedInStatus === false">
+    <search-blog-posts
+      @searchRecords="searchBlogs"
+      :myKey="filterKey"
+      :myDir="filterDir"
+      @requestKey="changeKey"
+      @requestDir="changeDir"
+    />
+
     <blog-posts-list
-      :blogPosts="getBlogPosts"
+      :blogPosts="filteredBlogPosts"
       pageName="home"
       :errorMsg="errorMessage"
       :loadingStatus="loadingStatus"
@@ -13,8 +21,16 @@
   <!-- -> Make the "Community" button to allow the user that is logged in
   to comment on other user's posts -->
   <div v-else>
+    <search-blog-posts
+      @searchRecords="searchBlogs"
+      :myKey="filterKey"
+      :myDir="filterDir"
+      @requestKey="changeKey"
+      @requestDir="changeDir"
+    />
+
     <blog-posts-list
-      :blogPosts="getBlogPosts"
+      :blogPosts="filteredBlogPosts"
       pageName="home"
       @delete="handleDeleteBlogPost"
       @edit="handleEditBlogPost"
@@ -29,6 +45,8 @@
 import { mapGetters, mapActions } from "vuex";
 import BlogPostsList from "@/components/BlogPostsList";
 import { filterErrorMessages } from "@/utils/utility";
+import SearchBlogPosts from "@/components/SearchBlogPosts";
+import _ from "lodash";
 
 export default {
   name: "HomePage",
@@ -36,12 +54,34 @@ export default {
     return {
       errorMessage: "",
       loadingStatus: true,
+      searchTerms: "",
+      filterKey: "title",
+      filterDir: "asc",
     };
   },
-  components: { BlogPostsList },
+  components: { BlogPostsList, SearchBlogPosts },
   computed: {
     ...mapGetters("auth", ["getLoggedInStatus", "getLoggedInUserData"]),
     ...mapGetters("blogPostsModule", ["getBlogPosts"]),
+    searchedBlogPosts: function () {
+      return this.getBlogPosts.filter((item) => {
+        console.log(item.authorName);
+        return (
+          item.title.toLowerCase().match(this.searchTerms.toLowerCase()) ||
+          item.category.toLowerCase().match(this.searchTerms.toLowerCase()) ||
+          item.authorName.toLowerCase().match(this.searchTerms.toLowerCase())
+        );
+      });
+    },
+    filteredBlogPosts: function () {
+      return _.orderBy(
+        this.searchedBlogPosts,
+        (item) => {
+          return item[this.filterKey].toLowerCase();
+        },
+        this.filterDir
+      );
+    },
   },
   created() {
     // -> get the logged in user's blog posts
@@ -60,6 +100,15 @@ export default {
       "getEntireListOfBlogPosts",
       "deleteBlogPost",
     ]),
+    changeKey: function (value) {
+      this.filterKey = value;
+    },
+    changeDir: function (value) {
+      this.filterDir = value;
+    },
+    searchBlogs: function (terms) {
+      this.searchTerms = terms;
+    },
     handleLogout: function () {
       this.logout();
       this.$router.push("/login");
