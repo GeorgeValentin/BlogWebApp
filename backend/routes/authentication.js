@@ -9,11 +9,8 @@ router.route("/register").post(async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    // 1. storing the array of blogPosts
+    // storing the array of blogPosts
     const blogPosts = [];
-
-    // -> storing references
-    // const blogPosts = {};
 
     if (
       username === undefined ||

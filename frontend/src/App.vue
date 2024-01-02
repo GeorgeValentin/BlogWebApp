@@ -1,6 +1,7 @@
 <template>
   <NavBar />
 
+  <!-- This will display the component equivalent to the one of the router -->
   <router-view />
 </template>
 
@@ -22,6 +23,7 @@ export default {
     const currentDate = new Date();
     const tokenData = localStorage.getItem("tokenResponse");
     const jsonToken = JSON.parse(tokenData);
+
     if (jsonToken !== null) {
       const tokenExpiry = jsonToken.expiry;
 
@@ -29,13 +31,13 @@ export default {
         tokenExpiry + 3600 <
           new Date(currentDate).setHours(currentDate.getHours())
       );
+
       if (
         tokenExpiry + 3600 <
         new Date(currentDate).setHours(currentDate.getHours())
       ) {
         console.log("Token has expired! Please login again!");
         this.logout();
-
         location.reload();
       }
     }
