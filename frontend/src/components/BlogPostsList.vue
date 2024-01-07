@@ -178,34 +178,48 @@ import LoadingSpinner from "./LoadingSpinner";
 export default {
   name: "BlogPostsList",
   props: ["blogPosts", "pageName", "errorMsg", "loadingStatus"],
+  // -> componente utilizate in cadrul acestei componente
   components: {
     FontAwesomeIcon,
     AlertMessage,
     LoadingSpinner,
   },
+  // -> variabilele componentei
   data() {
     return {
       contentSize: 36,
     };
   },
-
+  // -> similare cu metodele, ce definim aici se va reevalua (reexecuta) cand datele utilizate se modifica
   computed: {
+    // -> aici extragem datele din modului vuex auth, getLoggedInStatus si getLoggedInUserData
+    // -> de fiecare data cand acele date se vor modifica, acest getter se va reexecuta
+    // -> un alt fel de a scrie asta:
+    // loggedInStatus() {
+    //    return this.$store.getters["auth/getLoggedInStatus"];
+    // },
     ...mapGetters("auth", ["getLoggedInStatus", "getLoggedInUserData"]),
   },
   methods: {
+    // -> metoda care ia continutul si il face sa aiba doar 36 de cuvinte
     formatBlogPostContent(content) {
       let arrOfContentWords = content.split(" ");
       return arrOfContentWords.slice(0, this.contentSize).join(" ");
     },
+    // -> metoda care face cuvantul sa inceapa cu litara mare
     capitalizeTitle(title) {
       return title.charAt(0).toUpperCase() + title.substring(1);
     },
+    // -> metoda de read more
     handleReadMore(blogPostId, authorId) {
+      // -> userul nu e logat
       if (this.getLoggedInStatus === false) {
-        // navigate to login
+        // du-te la pagina de login
         this.$router.push("/login");
-      } else {
-        // navigate to BlogPost Page
+      }
+      // -> userul e logat
+      else {
+        // -> du-te la pagina de BlogPost (paseaza si id-urile blogPost-ului si al autorului)
         this.$router.push(
           `/blogPostPage/${blogPostId}/blogPostOwner/${authorId}`
         );

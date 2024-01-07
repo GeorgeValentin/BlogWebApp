@@ -3,6 +3,7 @@ import authHeader from "./auth.header";
 
 const API_URL = "api";
 
+// -> serviciu care cheama partea de comments a API-ului
 class CommentsService {
   async getAllCommentsWithoutLoggedInData(blogPostId) {
     return await axios.get(

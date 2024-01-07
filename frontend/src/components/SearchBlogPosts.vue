@@ -83,7 +83,8 @@ export default {
       searchTerm: "",
     };
   },
-  // this allows us to track an element as it changes its value
+  // -> urmareste un element cum isi schimba valoarea
+  // -> emite evenimentul de fiecare data cand scriem in input
   watch: {
     searchTerm: function () {
       this.$emit("searchRecords", this.searchTerm);

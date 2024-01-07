@@ -5,13 +5,16 @@ const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const jwt = require("jsonwebtoken");
 
+// -> POST /register
 router.route("/register").post(async (req, res) => {
   try {
+    // -> extragem proprietatile obiectului primit in request.body
     const { username, email, password } = req.body;
 
-    // storing the array of blogPosts
+    // colectia (array-ul) de blogPosts pe care il va avea fiecare utilizator inregistrat
     const blogPosts = [];
 
+    // -> verificam ca proprietatile primite din request sa existe
     if (
       username === undefined ||
       email === undefined ||
@@ -20,11 +23,13 @@ router.route("/register").post(async (req, res) => {
       return res.status(400).json({ message: "Missing credentials!" });
     }
 
+    // -> extragem toate documentele utilizatorilor existenti
     const users = await db.collection("users").get();
 
+    // -> obiect care ne arata daca exista email-ul respectiv
     let success = true;
 
-    // -> check if there is a user with the same email
+    // -> verificam daca mai exista vreun utilizator cu email-ul respectiv in baza de date
     for (let index = 0; index < users.docs.length; index++) {
       if (users.docs[index].data().email === email) {
         success = false;
@@ -32,21 +37,32 @@ router.route("/register").post(async (req, res) => {
       }
     }
 
+    // -> daca nu exista email-ul
     if (success) {
+      // -> aici vom face hash parolei
+      // -> saltRounds = de cate ori se va executa algoritmul de "hash-uire"
       const hash = await bcrypt.hash(password, saltRounds);
+
+      // -> creeaza utilizatorul in baza de date
       await db.collection("users").add({ username, email, hash, blogPosts });
 
+      // -> utilizator adaugat - raspuns cu status: 200 OK si mesaj: "User added succesfully!"
       return res.status(200).json({ message: "User added succesfully!" });
-    } else {
+    }
+    // -> daca exista email-ul
+    else {
+      // -> utilizator neadaugat - raspuns cu status: 400 Bad Request si mesaj: "Email address already registered!"
       return res
         .status(400)
         .json({ message: "Email address already registered!" });
     }
   } catch (err) {
+    // -> returnam Status 500 - Server error
     return res.status(500).json(err);
   }
 });
 
+// -> POST localhost:8080/authentication/login
 router.route("/login").post(async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -58,8 +74,8 @@ router.route("/login").post(async (req, res) => {
     let userToLogin;
     let loginResponse = {};
 
-    // -> check if the email entered by the user is the correct one
-    // -> when finding the correct user, take his/hers id and username as well
+    // -> verifica daca email-ul adaugat este cel corect
+    // -> cand gasim email-ul, vom pastra si id-ul si username-ul utilizatorului respectiv
     for (let index = 0; index < users.docs.length; index++) {
       if (users.docs[index].data().email === email) {
         userToLogin = users.docs[index].data();
@@ -68,20 +84,28 @@ router.route("/login").post(async (req, res) => {
       }
     }
 
+    // -> daca am gasit utilizatorul
     if (userToLogin) {
+      // -> verificam daca parola coincide cu ce am hash-uit in momentul in care am inregistrat utiliatorul
       const validPass = await bcrypt.compare(password, userToLogin.hash);
 
+      // -> parola corecta
       if (validPass) {
+        // -> luam un secret din fisierul .env
         const serverSecret = process.env.MY_SECRET;
 
+        // -> cream un obiect cu proprietatile de care avem nevoie
         const tokenPayload = {
           userId: userToLogin.userId,
           email: userToLogin.email,
           username: userToLogin.username,
         };
 
+        // -> semnam token-ul folosind secretul = vom crea token-ul, care va contine datele din tokenPayload,
+        // va avea nevoie de secret pentru a fi decodat si va expira in 1h
         let token = jwt.sign(tokenPayload, serverSecret, { expiresIn: "1h" });
 
+        // -> adaugam proprietatile pe care le vom returna din aceasta functie
         let currentDate = new Date();
         loginResponse.username = userToLogin.username;
         loginResponse.userId = userToLogin.userId;
@@ -92,9 +116,14 @@ router.route("/login").post(async (req, res) => {
           currentDate.getHours() + 1
         );
 
+        // -> returnam 200 OK cu proprietatile setate anterior
         return res.status(200).json(loginResponse);
-      } else return res.status(400).json({ message: "Wrong password!" });
-    } else {
+      }
+      // -> returnam 404 NOT FOUND - "Wrong password"
+      else return res.status(400).json({ message: "Wrong password!" });
+    }
+    // -> daca nu am gasit utilizatorul
+    else {
       return res.status(404).json({ message: "The user does not exist!" });
     }
   } catch (err) {
@@ -103,4 +132,5 @@ router.route("/login").post(async (req, res) => {
   }
 });
 
+// -> exportam obiectul router
 module.exports = router;

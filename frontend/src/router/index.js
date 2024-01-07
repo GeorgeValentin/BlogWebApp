@@ -7,6 +7,8 @@ import BlogPostPage from "../views/BlogPostPage";
 import CommunityPage from "../views/CommunityPage";
 import AddBlogPostPage from "../views/AddBlogPostPage";
 
+// -> array care contine rutele aplicatiei
+// -> pentru fiecare ruta vue va crea o componenta
 const routes = [
   {
     path: "/",
@@ -38,7 +40,7 @@ const routes = [
     name: "blogPostPage",
     component: BlogPostPage,
   },
-  // this will match any route path that is not specified above
+  // -> daca navigam la o ruta care nu e in lista de mai sus creeaza componenta NotFound
   {
     path: "/:catchAll(.*)",
     name: "NotFound",

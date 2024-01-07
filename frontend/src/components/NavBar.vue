@@ -19,9 +19,6 @@ export default {
       userEmail: {},
     };
   },
-  // -> lifecycle hook called after the Vue instance has been created but before it is mounted to the
-  // DOM
-  // -> best for data fetching, settings up event listeners or other initializations
   created() {
     this.userEmail = localStorage.getItem("userEmail");
   },

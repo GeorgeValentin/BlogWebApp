@@ -3,7 +3,9 @@ import authHeader from "./auth.header";
 
 const API_URL = "api";
 
+// -> serviciu care cheama partea de blogPosts a API-ului
 class BlogPostsService {
+  // -> metoda normala care cheama API-ul si returneaza raspunsul obtinut
   async getAllBlogPostsEndpoint() {
     return await axios.get(`${API_URL}/allBlogPosts`);
   }
@@ -26,6 +28,7 @@ class BlogPostsService {
     );
   }
 
+  // -> metoda care se foloseste de header-ul de auth
   async addBlogPost(loggedInUserId, blogPostToAdd) {
     return await axios.post(
       `${API_URL}/users/${String(loggedInUserId)}/blogPosts`,

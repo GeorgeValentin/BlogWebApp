@@ -6,33 +6,48 @@ const checkUser = require("../middleware/checkUser");
 const checkBlogPost = require("../middleware/checkBlogPost");
 const auth = require("../middleware/auth");
 
+// GET /allBlogPosts
 router.route("/allBlogPosts").get(async (req, res) => {
   try {
+    // -> extragem colectiile de obiecte din firestore
     const blogPostsCollection = db.collection("blogPosts");
     const usersCollection = db.collection("users");
+
+    // -> extragem documentele din colectia "blogPosts"
     let blogPostsDocs = await blogPostsCollection.get();
+
     let response = [];
 
+    // -> mapam documentele din colectia blogPosts
+    // = luam fiecare document din colectie, il modificam, si la final cream un nou array cu rezultatele obtinute
     const blogPostsArray = blogPostsDocs.docs.map(async (blogPostDoc) => {
+      // -> datele unui obiect din colectia de documente
       const blogPostDocData = blogPostDoc.data();
 
       const userDocRef = usersCollection.doc(blogPostDocData.authorId);
       const userDoc = await userDocRef.get();
       const userDocData = userDoc.data();
 
+      // -> cream un nou obiect: blogPostCopy, in care adaugam toate proprietatile obiectului blogPostDocData
+      // -> shallow copy = daca printre proprietatile copiate se numara array/object, orice modificare adusa acelor
+      // proprietati va fi reflectata in amandoua obiecte
       const { ...blogPostCopy } = blogPostDocData;
 
+      // -> cream un obiect folosind proprietatile lui blogPostCopy = ...blogPostCopy
+      // -> acestui obiect ii adaugam proprietatea authorName
       const blogPostWithAuthorName = {
         ...blogPostCopy,
         authorName: userDocData.username,
       };
 
+      // -> returnam obiectul
       return blogPostWithAuthorName;
     });
 
-    // Wait for all promises to resolve
+    // -> asteapta ca toate documentele sa fie parcurse si noul array sa fie creat
     response = await Promise.all(blogPostsArray);
 
+    // -> returnam 200 OK si array-ul cu datele blogPostului impreuna cu authorName-ul
     return res.status(200).json(response);
   } catch (err) {
     console.log(err);
@@ -40,10 +55,12 @@ router.route("/allBlogPosts").get(async (req, res) => {
   }
 });
 
-// -> get the blog posts of other users (DONE)
+// GET /users/:userId/blogPostsOfOthers
+// -> get the blog posts of other users
 // -> needed so that we can comment on other user's posts
 router
   .route("/users/:userId/blogPostsOfOthers")
+  // -> checkUser = middleware care verifica userId-ul
   .get(checkUser, async (req, res) => {
     try {
       const userId = req.params.userId;
@@ -57,10 +74,13 @@ router
       const blogPostsArray = blogPostsDocs.docs.map(async (blogPostDoc) => {
         const blogPostDocData = blogPostDoc.data();
 
+        // -> vrem sa modificam doar blogPost-urile care nu apartin utilizatorului utilizatorului al caruit ID e primit in ruta, cel logat
+        // -> vrem sa adaugam authorName-ul si sa returnam obiectul
         if (blogPostDocData.authorId !== userId) {
           const userDocRef = usersCollection.doc(blogPostDocData.authorId);
           const userDoc = await userDocRef.get();
           const userDocData = userDoc.data();
+
           const { ...blogPostCopy } = blogPostDocData;
 
           const blogPostWithAuthorName = {
@@ -72,10 +92,10 @@ router
         }
       });
 
-      // Wait for all promises to resolve
+      // -> asteapta incheierea executiei
       response = await Promise.all(blogPostsArray);
 
-      // Filter out null & undefined values
+      // -> filtreaza valorile care sunt null/undefined
       const filteredResponse = response.filter(
         (elem) => elem !== null && elem !== undefined
       );
@@ -87,8 +107,9 @@ router
     }
   });
 
+// GET /users/:userId/blogPosts
+// -> all blog posts of logged in user
 router
-  // -> all blog posts of logged in user (DONE)
   .route("/users/:userId/blogPosts")
   .get(checkUser, async (req, res) => {
     try {
@@ -97,32 +118,43 @@ router
       let response = [];
       let blogPostsArrCopy = [];
 
-      // -> if the blogPosts of the loggedIn user have no docs then randomly generate them with chance.js
-      // => 3 records generated
+      // -> daca utilizatorul autentificat nu are niciun document in colectia de blogPosts, genereaza-le random folosind chance.js
+      // => 3 documentel generate
       if (req.userDocData.blogPosts.length === 0) {
+        // -> genereaza un array de blogPosts
         const blogPostsArray = Array.from(
           { length: 3 },
           generateData.generateBlogPost
         );
 
+        // -> genereaza un array de categories
         const categoriesArray = Array.from(
           { length: 3 },
           generateData.generateCategory
         );
 
+        // -> parcurge array-ul de blogPosts
         for (let blogPost of blogPostsArray) {
+          // -> adauga fiecarui blogPost id-ul autorului (userul logat)
           blogPost.authorId = userId;
+
+          // -> adauga o categorie aleasa aleator din array
           const randomCategoryValue =
             categoriesArray[utils.randomizeArray(3)].category;
           blogPost.category = randomCategoryValue;
 
+          // -> adauga blogPost-ul in colectia din firestore
           const addedBlogPost = await blogPostsCollection.add(blogPost);
+
+          // -> seteaza id-ul blogPost-ului si colectia de comentarii in obiectul de blogPost din firestore
           blogPost.blogPostId = addedBlogPost.id;
           blogPost.comments = [];
 
+          // -> actualizeaza obiectul in firestore
           await blogPostsCollection.doc(addedBlogPost.id).update(blogPost);
         }
 
+        // -> creeaza o copie a array-ului de blogPost in care fiecare element sa includa si autorName-ul
         for (let blogPost of blogPostsArray) {
           const { ...blogPostCopy } = blogPost;
 
@@ -134,15 +166,18 @@ router
           blogPostsArrCopy.push(blogPostWithAuthorName);
         }
 
-        // 1. storing blogPosts array inside the user
+        // -> stocheaza array-ul in colectia de users, in documentul utilizatorului logat
         req.userDocRef.update({ blogPosts: blogPostsArray });
 
+        // -> returneaza array-ul care contine authorName-ul
         response = blogPostsArrCopy;
       } else {
-        // Retrieve and filter blog posts for the user
+        // -> Extrage si filtreaza blogPost-urile pentru utilizatorul logat
         const blogPostsQuerySnapshot = await blogPostsCollection
           .where("authorId", "==", userId)
           .get();
+
+        // -> parcurge documentele de tip blogPost, si adauga in response copii a fiecarui document in care acesta sa contina si authorName-ul
         blogPostsQuerySnapshot.forEach((blogPostDoc) => {
           const blogPostDocData = blogPostDoc.data();
 
@@ -163,7 +198,10 @@ router
       return res.status(500).json(err);
     }
   })
+  // -> POST /users/:userId/blogPosts
   // -> add a blog post (DONE)
+  // -> folosim middleware-uri
+  // -> auth = se asigura ca suntem logati inainte sa executam codul (peste tot pe unde l-am folosit e aceasta functionalitate)
   .post(auth, checkUser, async (req, res) => {
     try {
       const blogPostToAdd = req.body;
@@ -182,6 +220,8 @@ router
       const userId = req.params.userId;
       const loggedInUser = req.user;
 
+      // -> ne asiguram ca id-ul din ruta coincide cu cel al utilizatorului logat
+      // -> facem asta pentru ca nu vrem sa adaugam blogPost-uri altui utilizator
       if (loggedInUser.userId !== userId) {
         return res.status(401).json({
           message:
@@ -191,6 +231,7 @@ router
 
       const blogPostsCollection = db.collection("blogPosts");
 
+      // -> adauga blogPost-ul
       blogPostToAdd.authorId = userId;
       blogPostToAdd.comments = [];
       blogPostToAdd.lastModifiedAt = new Date().toLocaleDateString();
@@ -201,6 +242,7 @@ router
 
       req.userDocData.blogPosts.push(blogPostToAdd);
 
+      // -> modifica colectia de users, documentul userului logat, cu noua colectie de blogPosts, continand noul blogPost adaugat
       await req.userDocRef.update({ blogPosts: req.userDocData.blogPosts });
 
       return res.status(200).json(blogPostToAdd);
@@ -211,11 +253,14 @@ router
   });
 
 router
+  // GET /users/:userId/blogPosts/:blogPostId
+  // -> get blog post by id
   .route("/users/:userId/blogPosts/:blogPostId")
-  // -> get blog post by id (DONE)
   .get(checkUser, checkBlogPost, async (req, res) => {
+    // -> extragem informatiile blogPost-ului folosind middleware-ul checkBlogPost si cream o copie
     const { ...blogPostCopy } = req.blogPostDocData;
 
+    // -> adaugam authorName-ul pe noul blogPost folosind middleware-ul checkUser
     const blogPostWithAuthorName = {
       ...blogPostCopy,
       authorName: req.userDocData.username,
@@ -223,7 +268,8 @@ router
 
     return res.status(200).json(blogPostWithAuthorName);
   })
-  // -> update blog post (DONE)
+  // PUT /users/:userId/blogPosts/:blogPostId
+  // -> update blog post
   .put(auth, checkUser, checkBlogPost, async (req, res) => {
     const { blogPostId, userId } = req.params;
     const loggedInUser = req.user;
@@ -236,6 +282,7 @@ router
 
     const blogPostToUpdate = req.body;
 
+    // -> verificam ca obiectul primit din request sa contina toate informatiile necesare
     if (
       blogPostToUpdate.title === undefined ||
       blogPostToUpdate.title === null ||
@@ -253,6 +300,7 @@ router
       });
     }
 
+    // -> modificam documentul blogPost cu informatiile primite de pe request
     req.blogPostDocData.title = blogPostToUpdate.title;
     req.blogPostDocData.content = blogPostToUpdate.content;
     req.blogPostDocData.category = blogPostToUpdate.category;
@@ -260,6 +308,8 @@ router
 
     await req.blogPostDocRef.update(req.blogPostDocData);
 
+    // -> modificam documentul utilizatorului logat, colectia de blogPosts, blogPost-ul avand id-ul primit in URL
+    // cu informatiile primite de pe request
     for (const blogPost of req.userDocData.blogPosts) {
       if (blogPost.blogPostId === blogPostId) {
         blogPost.content = blogPostToUpdate.content;
@@ -274,7 +324,8 @@ router
       message: `The blog post with id {${blogPostId}} has been updated!`,
     });
   })
-  // -> delete a post with a specific user id (DONE - to be updated after adding the "comments" collection)
+  // DELETE /users/:userId/blogPosts/:blogPostId
+  // -> delete a post with a specific user id
   .delete(auth, checkUser, checkBlogPost, async (req, res) => {
     const { userId, blogPostId } = req.params;
     const loggedInUser = req.user;
@@ -288,15 +339,18 @@ router
     const commentsCollection = db.collection("comments");
     const commentsDocs = await commentsCollection.get();
 
-    // -> check if the loggedIn user is the same with the owner of the blog post
+    // -> verificam ca utilizatorul logat sa fie detinatorul blogPost-ului
     if (loggedInUser.userId === userId) {
+      // -> blogPost-ul are comentarii
       if (req.blogPostDocData.comments.length !== 0) {
-        // remove comments from the table
+        // le stergem pentru ca nu are sens sa le pastram daca blogPost-ul nu mai exista
         commentsDocs.forEach(async (commentDoc) => {
           const commentDocData = commentDoc.data();
 
+          // -> sterge un comentariu
           await commentsCollection.doc(commentDocData.commentId).delete();
 
+          // -> actualizeaza colectia blogPost-urilor
           let blogPostComments = req.blogPostDocData.comments;
 
           blogPostComments = blogPostComments.filter(
@@ -312,18 +366,17 @@ router
       });
     }
 
-    // -> update the users array of blogPosts
+    // -> sterge blogPost-ul din documentul utilizatorului logat
     let userBlogPosts = req.userDocData.blogPosts;
 
-    // -> remove the blog post from the users collection
     userBlogPosts = userBlogPosts.filter(
       (userBlogPost) => userBlogPost.blogPostId !== blogPostId
     );
 
-    // -> update the "users" collection to not include that blog post
+    // -> actualizeaza documentul utilizatorului logat sa nu includa blogPostul specificat
     await req.userDocRef.update({ blogPosts: userBlogPosts });
 
-    // -> remove the blog post from the "blogPosts" collection
+    // -> sterge blogPost-ul specificat din colectia de blogPosts
     await req.blogPostDocRef.delete();
 
     return res.status(200).json({

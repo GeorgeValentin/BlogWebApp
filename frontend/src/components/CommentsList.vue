@@ -152,6 +152,8 @@ export default {
       eventsStatus: false,
     };
   },
+  // -> parte a codului care se executa cand componenta e creata dar inainte sa fie desenata pe ecram (adaugata in DOM)
+  // -> utilizat pentru chemarea API-urilor, setare intiiala de variabile
   created() {
     this.blogPostId = this.$route.params.blogPostId;
     this.userId = this.$route.params.authorId;
@@ -163,6 +165,7 @@ export default {
     },
   },
   methods: {
+    // -> metoda care emite un eveniment denumit "addComment" catre componenta parinte si ii paseaza payload-ul cu date
     addComment: function () {
       const payload = {
         userId: this.userId,

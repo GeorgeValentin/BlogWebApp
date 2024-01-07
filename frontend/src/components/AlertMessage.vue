@@ -6,7 +6,9 @@
 
 <script>
 export default {
+  // -> numele componentei
   name: "ErrorMessage",
+  // -> proprietatile componentei
   props: ["msg", "alertType"],
 };
 </script>
