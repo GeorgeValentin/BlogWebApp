@@ -98,7 +98,7 @@ router
   });
 
 router
-  // GET /users/:userId/blogPosts/:blogPostId/comments
+  // POST /users/:userId/blogPosts/:blogPostId/comments
   // -> add a comment to a blog post of some other user (not to the same that is logged in)
   .route("/users/:userId/blogPosts/:blogPostId/comments")
   .post(auth, checkUser, checkBlogPost, async (req, res) => {
@@ -245,6 +245,7 @@ router
       message: `The comment with id {${commentId}} has been updated!`,
     });
   })
+
   // DELETE /users/:userId/blogPosts/:blogPostId/comments/:commentId
   .delete(auth, checkComment, checkUser, checkBlogPost, async (req, res) => {
     const { userId, blogPostId, commentId } = req.params;

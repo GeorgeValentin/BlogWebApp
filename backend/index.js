@@ -19,7 +19,7 @@ app.use("/authentication", require("./routes/authentication"));
 app.use("/api", require("./routes/blogPosts"));
 app.use("/api", require("./routes/comments"));
 
-// -> crearea seerverului de express.js
+// -> crearea serverului de express.js
 app.listen(serverPort, async () => {
   console.log(`Server started on port ${serverPort}`);
 });

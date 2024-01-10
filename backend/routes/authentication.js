@@ -119,7 +119,7 @@ router.route("/login").post(async (req, res) => {
         // -> returnam 200 OK cu proprietatile setate anterior
         return res.status(200).json(loginResponse);
       }
-      // -> returnam 404 NOT FOUND - "Wrong password"
+      // -> returnam 400 Bad Request - "Wrong password"
       else return res.status(400).json({ message: "Wrong password!" });
     }
     // -> daca nu am gasit utilizatorul

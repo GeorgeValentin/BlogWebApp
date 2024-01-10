@@ -198,6 +198,7 @@ router
       return res.status(500).json(err);
     }
   })
+
   // -> POST /users/:userId/blogPosts
   // -> add a blog post (DONE)
   // -> folosim middleware-uri
@@ -268,6 +269,7 @@ router
 
     return res.status(200).json(blogPostWithAuthorName);
   })
+
   // PUT /users/:userId/blogPosts/:blogPostId
   // -> update blog post
   .put(auth, checkUser, checkBlogPost, async (req, res) => {
@@ -324,6 +326,7 @@ router
       message: `The blog post with id {${blogPostId}} has been updated!`,
     });
   })
+
   // DELETE /users/:userId/blogPosts/:blogPostId
   // -> delete a post with a specific user id
   .delete(auth, checkUser, checkBlogPost, async (req, res) => {
