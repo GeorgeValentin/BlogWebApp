@@ -55,10 +55,6 @@ export default {
   height: 100vh;
 }
 
-.page-element {
-  height: 86vh;
-}
-
 nav {
   padding: 30px;
 }

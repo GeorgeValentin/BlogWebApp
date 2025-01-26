@@ -9,11 +9,9 @@ const auth = require("../middleware/auth");
 // GET /allBlogPosts
 router.route("/allBlogPosts").get(async (req, res) => {
   try {
-    // -> extragem colectiile de obiecte din firestore
     const blogPostsCollection = db.collection("blogPosts");
     const usersCollection = db.collection("users");
 
-    // -> extragem documentele din colectia "blogPosts"
     let blogPostsDocs = await blogPostsCollection.get();
 
     let response = [];

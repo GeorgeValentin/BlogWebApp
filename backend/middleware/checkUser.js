@@ -1,6 +1,5 @@
 const { db } = require("../firebaseConfig");
 
-// -> acelasi lucru ca in fisierul checkBlogPost.js
 const checkUser = async (req, res, next) => {
   const { userId } = req.params;
   const userDocRef = db.collection("users").doc(userId);

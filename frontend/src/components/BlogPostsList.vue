@@ -7,8 +7,7 @@
     <!-- Community Page Title -->
     <div
       v-if="pageName === 'community'"
-      class="d-flex justify-content-center align-items-center gap-3 mt-4 mb-3"
-    >
+      class="d-flex justify-content-center align-items-center gap-3 mt-4 mb-3">
       <header>
         <h2 class="fw-bold fs-2 m-0">Community - What others are Posting</h2>
 
@@ -24,8 +23,7 @@
       <!-- Logged In User Title -->
       <div
         v-if="getLoggedInStatus === true"
-        class="position-relative d-flex justify-content-center align-items-center gap-3 mt-4 mb-3"
-      >
+        class="position-relative d-flex justify-content-center align-items-center gap-3 mt-4 mb-3">
         <header>
           <h2 class="fw-bold fs-2 m-0">
             The Blog Posts of User "{{ getLoggedInUserData.username }}"
@@ -41,8 +39,7 @@
 
       <div
         v-else
-        class="d-flex justify-content-center align-items-center gap-3 mt-4 mb-3"
-      >
+        class="d-flex justify-content-center align-items-center gap-3 mt-4 mb-3">
         <!-- No one logged in Title -->
         <header>
           <h2 class="fw-bold fs-2 m-0">Blog Posts</h2>
@@ -52,31 +49,26 @@
 
     <div
       v-if="blogPosts.length === 0"
-      class="fw-bold fs-4 fst-italic w-25 missing-blog-posts-container"
-    >
+      class="fw-bold fs-4 fst-italic w-25 missing-blog-posts-container">
       <img
         class="missing-blog-posts-img mb-3"
         src="../assets/noPosts.png"
-        alt="missing-blog-posts"
-      />
+        alt="missing-blog-posts" />
 
       <p>No Blog Posts found at the moment!</p>
     </div>
 
     <div
-      class="flex-outer-container row justify-content-center py-5 px-5 gap-4"
-    >
+      class="flex-outer-container row justify-content-center py-5 px-5 gap-4">
       <div
         class="card-container text-center col-xxl-6 col-xl-4 col-md-12 col-sm-4 p-0"
         v-for="blogPost in blogPosts"
-        :key="blogPost.blogPostId"
-      >
+        :key="blogPost.blogPostId">
         <div class="card border-2 border-light rounded" style="width: 20rem">
           <div class="card-body">
             <div v-if="pageName === 'home' && getLoggedInStatus === true">
               <div
-                class="action-btns-container d-flex justify-content-center align-items-center"
-              >
+                class="action-btns-container d-flex justify-content-center align-items-center">
                 <button
                   class="delete-btn btn btn-danger border border-danger border-2"
                   @click="
@@ -85,31 +77,26 @@
                       getLoggedInUserData.userId,
                       blogPost.blogPostId
                     )
-                  "
-                >
+                  ">
                   <font-awesome-icon icon="trash" />
                 </button>
 
                 <button
                   class="update-btn btn btn-warning text-dark border border-2 border-warning"
-                  @click="$emit('edit', blogPost.blogPostId)"
-                >
+                  @click="$emit('edit', blogPost.blogPostId)">
                   <font-awesome-icon icon="pen-to-square" />
                 </button>
               </div>
             </div>
 
             <header
-              class="card-title d-flex justify-content-center align-items-center gap-5"
-            >
+              class="card-title d-flex justify-content-center align-items-center gap-5">
               <div
-                class="element-with-img-container fs-5 fw-bold d-flex justify-content-center align-items-center gap-2"
-              >
+                class="element-with-img-container fs-5 fw-bold d-flex justify-content-center align-items-center gap-2">
                 <img
                   src="../assets/blogger.png"
                   alt="blogger-img"
-                  class="blogger-img"
-                />
+                  class="blogger-img" />
                 <div class="fst-italic fs-5 fw-bold">
                   {{ blogPost.authorName }}
                 </div>
@@ -120,13 +107,11 @@
               </div>
 
               <div
-                class="element-with-img-container d-flex justify-content-center align-items-center gap-2"
-              >
+                class="element-with-img-container d-flex justify-content-center align-items-center gap-2">
                 <img
                   class="category-img"
                   src="../assets/blog.png"
-                  alt="category-img"
-                />
+                  alt="category-img" />
 
                 <div class="fs-6">
                   {{ blogPost.category }}
@@ -139,16 +124,14 @@
             </div>
 
             <div
-              class="comments-container fs-6 fw-bold fst-italic d-flex justify-content-center align-items-center gap-2"
-            >
+              class="comments-container fs-6 fw-bold fst-italic d-flex justify-content-center align-items-center gap-2">
               <font-awesome-icon icon="comment" />
 
               {{ blogPost.comments.length }}
             </div>
 
             <div
-              class="content-container d-flex flex-column justify-content-between align-items-center border border-2 border-dark rounded p-2 my-2"
-            >
+              class="content-container d-flex flex-column justify-content-between align-items-center border border-2 border-dark rounded p-2 my-2">
               <div class="content fs-6 fw-bold fst-italic">
                 "{{ formatBlogPostContent(blogPost.content) }}"
                 <span class="fw-bold fst-italic">...</span>
@@ -158,8 +141,7 @@
             <!-- Navigate to Blog Post page where the user can read it all (must be logged in)-->
             <button
               class="read-more-btn fw-bold"
-              @click="handleReadMore(blogPost.blogPostId, blogPost.authorId)"
-            >
+              @click="handleReadMore(blogPost.blogPostId, blogPost.authorId)">
               Read More
             </button>
           </div>
@@ -239,7 +221,11 @@ export default {
   background-color: #f6e58d;
   color: #000;
   height: 20rem;
-  width: 36rem !important;
+  width: 28rem !important;
+}
+
+.card-title {
+  margin-top: 0.35rem;
 }
 
 .content-container {
@@ -288,12 +274,12 @@ export default {
 }
 
 .blogger-img {
-  width: 2rem;
+  width: 1.25rem;
 }
 
 .action-btns-container {
   position: relative;
-  height: 1.5rem;
+  height: 1.25rem;
 }
 
 .delete-btn {

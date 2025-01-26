@@ -1,12 +1,10 @@
 <template>
   <article
-    class="page-element d-flex justify-content-center align-items-center blog-post-page"
-  >
+    class="page-element d-flex justify-content-center align-items-center blog-post-page">
     <div class="card">
       <div class="card-body">
         <header
-          class="title-container d-flex justify-content-center align-items-center gap-3"
-        >
+          class="title-container d-flex justify-content-center align-items-center gap-3">
           <h5 class="my-4 fw-bold fs-2">
             Blog post of author "{{ username }}"
           </h5>
@@ -14,21 +12,18 @@
           <img
             class="blog-post-img"
             src="../assets/blog-post.png"
-            alt="blog-post"
-          />
+            alt="blog-post" />
         </header>
 
         <div
-          class="form-field-group importantPublications d-flex justify-content-between m-auto p-2"
-        >
+          class="form-field-group importantPublications d-flex justify-content-between m-auto p-2">
           <span class="fw-bold text-dark me-1 fs-6">Title:</span>
 
           <input
             type="text"
             class="input-container border border-1 border-secondary rounded"
             v-model="getBlogPost.title"
-            v-if="blogPostOfLoggedInUserStatus === true"
-          />
+            v-if="blogPostOfLoggedInUserStatus === true" />
 
           <div v-else class="text-field-highlight">
             {{ getBlogPost.title }}
@@ -37,16 +32,14 @@
 
         <div
           class="form-field-group importantPublications d-flex justify-content-between m-auto p-2"
-          v-if="getBlogPost.category !== undefined"
-        >
+          v-if="getBlogPost.category !== undefined">
           <span class="fw-bold text-dark me-1 fs-6">Category:</span>
 
           <input
             type="text"
             class="input-container border border-1 border-secondary rounded"
             v-model="getBlogPost.category"
-            v-if="blogPostOfLoggedInUserStatus === true"
-          />
+            v-if="blogPostOfLoggedInUserStatus === true" />
 
           <div v-else class="text-field-highlight">
             {{ getBlogPost.category }}
@@ -54,22 +47,19 @@
         </div>
 
         <div
-          class="form-field-group name d-flex justify-content-between align-items-center m-auto p-2"
-        >
+          class="form-field-group name d-flex justify-content-between align-items-center m-auto p-2">
           <span class="fw-bold text-dark me-1 fs-6">Content:</span>
 
           <textarea
             type="text"
             class="input-container content-box border border-1 border-secondary rounded"
             v-model="getBlogPost.content"
-            v-if="blogPostOfLoggedInUserStatus === true"
-          ></textarea>
+            v-if="blogPostOfLoggedInUserStatus === true"></textarea>
 
           <div
             v-else
             id="text-area-highlight-text"
-            class="text-field-highlight content-container"
-          >
+            class="text-field-highlight content-container">
             <div>
               {{ getBlogPost.content }}
             </div>
@@ -83,36 +73,31 @@
             :noCommentsMessage="emptyCommentMsg"
             @addComment="addComment"
             @deleteComment="deleteComment"
-            @editComment="editComment"
-          />
+            @editComment="editComment" />
         </div>
 
         <div
           class="d-flex justify-content-center align-items-center flex-column gap-2 my-3"
-          v-else
-        >
+          v-else>
           <div
-            class="blog-post-page-btns-container d-flex justify-content-center align-items-center flex-column gap-2"
-          >
+            class="blog-post-page-btns-container d-flex justify-content-center align-items-center flex-row gap-2">
             <button
               type="button"
-              class="btn btn-success fw-bold w-25"
+              class="btn btn-success fw-bold"
               @click="
                 editBlogPost(
                   getLoggedInUserData.userId,
                   blogPostId,
                   getBlogPost
                 )
-              "
-            >
+              ">
               Edit Post
             </button>
 
             <button
               type="button"
-              class="btn btn-dark fw-bold w-25"
-              @click="goBackHome"
-            >
+              class="btn btn-dark fw-bold"
+              @click="goBackHome">
               Go Back
             </button>
           </div>
@@ -120,8 +105,7 @@
           <comments-list
             :eventEmitStatus="false"
             :commentsList="getCommentsOfOtherUsers"
-            :noCommentsMessage="emptyCommentMsg"
-          />
+            :noCommentsMessage="emptyCommentMsg" />
         </div>
       </div>
 
@@ -393,7 +377,7 @@ export default {
 .card {
   width: 35rem;
   height: 79%;
-  margin: auto;
+  margin: 3rem auto;
   background-color: #f6e58d;
 }
 .form-field-group {
@@ -494,6 +478,7 @@ export default {
 
   .blog-post-page-btns-container > button {
     width: 40% !important;
+    font-weight: bold !important;
   }
 }
 </style>

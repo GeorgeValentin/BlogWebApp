@@ -14,8 +14,7 @@
       <img
         id="profile-img"
         src="//ssl.gstatic.com/accounts/ui/avatar_2x.png"
-        class="profile-img-card"
-      />
+        class="profile-img-card" />
 
       <Form @submit="handleLogin" :validation-schema="schema">
         <div class="form-group mb-3">
@@ -25,8 +24,7 @@
               name="email"
               type="text"
               class="form-control register-input fw-bold m-auto border border-2 border-dark"
-              v-model="user.email"
-            />
+              v-model="user.email" />
             <ErrorMessage name="email" class="text-danger fw-bold" />
           </div>
         </div>
@@ -37,32 +35,26 @@
             name="password"
             type="password"
             class="form-control register-input fw-bold m-auto border border-2 border-dark"
-            v-model="user.password"
-          />
+            v-model="user.password" />
           <ErrorMessage
             name="password"
-            class="text-danger error-feedback fw-bold"
-          />
+            class="text-danger error-feedback fw-bold" />
         </div>
 
         <div
-          class="form-group d-flex justify-content-center align-items-center flex-column gap-2 mt-5"
-        >
+          class="form-group d-flex justify-content-center align-items-center flex-column gap-2 mt-5">
           <button
             class="control-btn btn btn-primary fw-bold border border-3 border-primary w-100 m-auto"
-            :disabled="loading"
-          >
+            :disabled="loading">
             <span
               v-show="loading"
-              class="spinner-border spinner-border-sm"
-            ></span>
+              class="spinner-border spinner-border-sm"></span>
             <span>Login</span>
           </button>
 
           <button
             class="control-btn btn btn-outline-primary fw-bold border border-3 border-primary w-100 m-auto"
-            @click="navigateToRegisterPage"
-          >
+            @click="navigateToRegisterPage">
             No Account? Register!
           </button>
         </div>
@@ -119,6 +111,8 @@ export default {
       this.loading = true;
       try {
         const response = await this.login(this.user);
+
+        console.log(response);
 
         if (response.message === "Logged in successfully!")
           this.$router.push("/");

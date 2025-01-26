@@ -5,6 +5,9 @@
 npm install
 ```
 
+## .ENV setup
+Add a .env file with a MY_SECRET element which will be used for authentication
+
 ### Compiles and hot-reloads for development
 ```
 npm run serve
